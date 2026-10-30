@@ -1,0 +1,162 @@
+/* Custom styles for Churrasquinho do Ivanzinho */
+
+/* Ocultar barra de rolagem mas permitir scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Animações */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Categorias */
+.category-btn {
+  background-color: #1A1D20;
+  color: #9CA3AF;
+  border: 1px solid #2E343A;
+}
+
+.category-btn.active {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #111315;
+  border-color: #F59E0B;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+
+/* Product Card */
+.product-card {
+  background: #1A1D20;
+  border: 1px solid #2E343A;
+  border-radius: 1rem;
+  padding: 0.9rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: #1F2327;
+}
+
+.product-card.has-items {
+  border-color: rgba(245, 158, 11, 0.8);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.08);
+}
+
+/* Botões de quantidade */
+.qty-btn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: all 0.15s ease;
+}
+
+.qty-btn-minus {
+  background-color: #24282D;
+  color: #9CA3AF;
+  border: 1px solid #2E343A;
+}
+.qty-btn-minus:hover {
+  background-color: #EF4444;
+  color: white;
+  border-color: #EF4444;
+}
+
+.qty-btn-plus {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: #111315;
+}
+.qty-btn-plus:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
+}
+
+/* Efeito de badge pulsante */
+.badge-count {
+  background: #EF4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  border: 2px solid #111315;
+}
+
+/* Opções de rádio personalizadas no checkout */
+.delivery-type-btn.active {
+  border-color: #F59E0B !important;
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #F59E0B !important;
+}
+
+/* Produtos bloqueados para entrega */
+.product-card.delivery-blocked {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+  background: #141719;
+  border-style: dashed;
+  border-color: #3b2222;
+}
+
+.product-card.delivery-blocked:hover {
+  border-color: #ef4444;
+}
+
+.blocked-pill {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Toast show */
+.toast-visible {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+

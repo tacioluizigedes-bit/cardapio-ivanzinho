@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cardápio Online | Churrasquinho do Ivanzinho</title>
+  <meta name="description" content="Faça seu pedido online no Churrasquinho do Ivanzinho. Churrasco misto, porções, bebidas geladas e muito mais!">
+  
+  <!-- Fontes Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              gold: '#F59E0B',
+              amber: '#D97706',
+              fire: '#EF4444',
+              red: '#B91C1C',
+              dark: '#111315',
+              card: '#1A1D20',
+              cardLight: '#24282D',
+              border: '#2E343A'
+            }
+          },
+          fontFamily: {
+            display: ['"Bebas Neue"', 'sans-serif'],
+            body: ['"Plus Jakarta Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-brand-dark text-gray-100 font-body min-h-screen pb-24 selection:bg-brand-gold selection:text-black">
+
+  <!-- TOPO / BANNER DA LOJA -->
+  <header class="relative bg-gradient-to-b from-brand-cardLight via-brand-dark to-brand-dark border-b border-brand-border overflow-hidden">
+    <!-- Efeito de Brilho / Fogo de fundo -->
+    <div class="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none mix-blend-screen"
+         style="background-image: radial-gradient(circle at 50% 20%, rgba(239, 68, 68, 0.45), transparent 70%);">
+    </div>
+
+    <div class="max-w-xl mx-auto px-4 pt-6 pb-6 relative z-10">
+      
+      <!-- Logo & Título -->
+      <div class="flex flex-col items-center text-center">
+        <!-- Ícone / Emblema -->
+        <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-600 via-brand-gold to-yellow-300 p-1 shadow-lg shadow-amber-500/20 mb-3 animate-pulse">
+          <div class="w-full h-full bg-brand-dark rounded-full flex items-center justify-center border-2 border-brand-dark">
+            <i class="fa-solid fa-fire-flame-curved text-3xl text-brand-gold"></i>
+          </div>
+        </div>
+        
+        <span class="inline-block px-3 py-1 bg-brand-fire/20 text-red-400 border border-brand-fire/40 rounded-full text-xs font-bold tracking-wider uppercase mb-1">
+          <i class="fa-solid fa-utensils mr-1"></i> Cardápio Oficial
+        </span>
+
+        <h1 class="text-4xl md:text-5xl font-display tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-brand-gold to-red-400 drop-shadow">
+          CHURRASQUINHO DO IVANZINHO
+        </h1>
+        
+        <p class="text-gray-300 text-xs md:text-sm font-semibold mt-1 max-w-md">
+          Churrasco • Bebidas • Porções • Sabor que todo mundo ama! 🥩🔥
+        </p>
+
+        <!-- Informações Rápidas -->
+        <div class="w-full grid grid-cols-2 gap-2 mt-4 text-left">
+          
+          <!-- Horários -->
+          <div class="bg-brand-card p-2.5 rounded-xl border border-brand-border/80 flex items-start space-x-2">
+            <i class="fa-regular fa-clock text-brand-gold text-sm mt-0.5"></i>
+            <div class="text-xs">
+              <span class="block font-bold text-gray-200">Horários</span>
+              <p class="text-[11px] text-gray-400 leading-tight">Qua a Sex: 19h<br>Sáb e Dom: 12h (Almoço/Janta)</p>
+            </div>
+          </div>
+
+          <!-- Endereço -->
+          <div class="bg-brand-card p-2.5 rounded-xl border border-brand-border/80 flex items-start space-x-2">
+            <i class="fa-solid fa-location-dot text-brand-fire text-sm mt-0.5"></i>
+            <div class="text-xs">
+              <span class="block font-bold text-gray-200">Localização</span>
+              <p class="text-[11px] text-gray-400 leading-tight truncate" title="Rua Domingos Alves Ribeiro, 32 - Campo Grande">
+                R. Domingos Alves Ribeiro, 32<br>Campo Grande - RJ
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- WhatsApp da Loja -->
+        <a href="https://wa.me/5521990285734" target="_blank" class="mt-2.5 w-full bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/40 rounded-xl p-2.5 flex items-center justify-between text-left transition-all group">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+              <i class="fa-brands fa-whatsapp text-lg"></i>
+            </div>
+            <div>
+              <p class="text-[11px] text-gray-400 font-medium">WhatsApp Delivery da Loja:</p>
+              <p class="text-xs font-black text-emerald-300 tracking-wide">(21) 99028-5734</p>
+            </div>
+          </div>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+            <i class="fa-solid fa-bolt text-[9px]"></i> Online
+          </span>
+        </a>
+
+        <!-- Alerta de Assistente e PIX -->
+        <div class="mt-2.5 w-full bg-gradient-to-r from-amber-500/10 via-brand-gold/10 to-red-500/10 border border-brand-gold/30 rounded-xl p-2.5 flex items-center justify-between text-left">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-lg bg-brand-gold/20 flex items-center justify-center text-brand-gold">
+              <i class="fa-brands fa-pix text-lg"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-yellow-300">Pagamento com PIX Disponível!</p>
+              <p class="text-[11px] text-gray-400">Ao enviar o pedido, a assistente envia o QR Code.</p>
+            </div>
+          </div>
+          <span class="flex h-2.5 w-2.5 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Filtro de Categorias (Barra Deslizante) -->
+    <nav class="sticky top-0 z-30 bg-brand-dark/95 backdrop-blur-md border-y border-brand-border py-2 px-3 overflow-x-auto no-scrollbar shadow-md">
+      <div class="flex space-x-2 max-w-xl mx-auto w-max px-1" id="categoryNav">
+        <button onclick="filterCategory('todos')" class="category-btn active px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-fire"></i> Todos
+        </button>
+        <button onclick="filterCategory('refeicoes')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-plate-wheat"></i> Refeições
+        </button>
+        <button onclick="filterCategory('porcoes')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-drumstick-bite"></i> Porções
+        </button>
+        <button onclick="filterCategory('acompanhamentos')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-bowl-rice"></i> Extras
+        </button>
+        <button id="cat-btn-baldes" onclick="filterCategory('baldes')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-beer-mug-empty"></i> Baldes
+        </button>
+        <button onclick="filterCategory('bebidas')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-wine-bottle"></i> Bebidas
+        </button>
+        <button id="cat-btn-drinks" onclick="filterCategory('drinks')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-martini-glass-citrus"></i> Drinks
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- LISTA DE PRODUTOS & DADOS DO CLIENTE -->
+  <main class="max-w-xl mx-auto px-4 py-4 space-y-6">
+
+    <!-- CARTÃO DE IDENTIFICAÇÃO DO CLIENTE (INÍCIO DA PÁGINA) -->
+    <section class="bg-brand-card rounded-2xl border border-brand-gold/40 p-4 shadow-xl shadow-black/40 relative overflow-hidden">
+      <!-- Destaque visual no topo do card -->
+      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-amber via-brand-gold to-yellow-300"></div>
+
+      <div class="flex items-center justify-between mb-3 pt-1">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 rounded-lg bg-brand-gold/20 flex items-center justify-center text-brand-gold">
+            <i class="fa-solid fa-id-card text-base"></i>
+          </div>
+          <div>
+            <h2 class="font-display text-lg tracking-wide text-yellow-300 leading-tight">IDENTIFICAÇÃO DO CLIENTE</h2>
+            <p class="text-[11px] text-gray-400">Preencha seus dados para agilizar o atendimento</p>
+          </div>
+        </div>
+        <span class="text-[10px] bg-brand-gold/20 text-yellow-400 px-2.5 py-1 rounded-full font-bold border border-brand-gold/30 uppercase tracking-wider">
+          Passo 1
+        </span>
+      </div>
+
+      <!-- Tipo de Recebimento (Entrega / Retirada) -->
+      <div class="mb-3">
+        <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
+          Como deseja receber seu pedido?
+        </label>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" id="btnHeaderEntrega" onclick="setDeliveryType('entrega')" class="delivery-type-btn active flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-brand-gold bg-brand-gold/20 text-brand-gold font-bold text-xs transition-all">
+            <i class="fa-solid fa-motorcycle text-sm"></i>
+            <span>Entrega (Delivery)</span>
+          </button>
+          <button type="button" id="btnHeaderRetirada" onclick="setDeliveryType('retirada')" class="delivery-type-btn flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-brand-border bg-brand-cardLight text-gray-400 font-bold text-xs transition-all">
+            <i class="fa-solid fa-store text-sm"></i>
+            <span>Retirada no Local</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Campos de Identificação -->
+      <div class="space-y-2.5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-300 mb-1">
+              <i class="fa-solid fa-user text-brand-gold mr-1 text-[10px]"></i>Seu Nome *
+            </label>
+            <input type="text" id="custNameHeader" placeholder="Ex: Lucas Silva" oninput="syncCustomerData('name', this.value)" class="w-full bg-brand-dark/80 border border-brand-border rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors">
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-300 mb-1">
+              <i class="fa-brands fa-whatsapp text-emerald-400 mr-1 text-[10px]"></i>Telefone / WhatsApp *
+            </label>
+            <input type="tel" id="custPhoneHeader" placeholder="(21) 99999-9999" oninput="syncCustomerData('phone', this.value)" class="w-full bg-brand-dark/80 border border-brand-border rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors">
+          </div>
+        </div>
+
+        <!-- Seção de Endereço (condicional à Entrega) -->
+        <div id="addressSectionHeader" class="space-y-2 pt-2 border-t border-brand-border/60">
+          <div class="flex items-center justify-between">
+            <label class="block text-[11px] text-yellow-400 font-bold">
+              <i class="fa-solid fa-map-pin mr-1 text-[10px]"></i>Endereço para Entrega *
+            </label>
+            <span class="text-[10px] text-gray-400 italic">Campo Grande e região</span>
+          </div>
+          
+          <div class="grid grid-cols-3 gap-2">
+            <input type="text" id="custStreetHeader" placeholder="Rua / Avenida *" oninput="syncCustomerData('street', this.value)" class="col-span-2 bg-brand-dark/80 border border-brand-border rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors">
+            <input type="text" id="custNumberHeader" placeholder="Nº *" oninput="syncCustomerData('number', this.value)" class="bg-brand-dark/80 border border-brand-border rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="custNeighborhoodHeader" placeholder="Bairro *" oninput="syncCustomerData('neighborhood', this.value)" class="bg-brand-dark/80 border border-brand-border rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors">
+            <input type="text" id="custComplementHeader" placeholder="Apto / Bloco / Ponto de Ref." oninput="syncCustomerData('complement', this.value)" class="bg-brand-dark/80 border border-brand-border rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-1 text-[11px] text-gray-400">
+          <span><i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>Seus dados são enviados diretamente à loja via WhatsApp.</span>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- SEÇÃO: REFEIÇÕES -->
+    <section id="sec-refeicoes" class="product-section">
+      <div class="flex items-center space-x-2 mb-3">
+        <span class="w-1.5 h-6 bg-brand-gold rounded-full inline-block"></span>
+        <h2 class="text-xl font-display tracking-wider text-yellow-400">REFEIÇÃO CHURRASCO MISTO</h2>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">
+        Acompanha: Arroz soltinho, farofa crocante, vinagrete da casa e salpicão especial.
+      </p>
+      
+      <div class="grid grid-cols-1 gap-3" id="list-refeicoes">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+    <!-- SEÇÃO: PORÇÕES MISTAS -->
+    <section id="sec-porcoes" class="product-section">
+      <div class="flex items-center space-x-2 mb-3">
+        <span class="w-1.5 h-6 bg-red-500 rounded-full inline-block"></span>
+        <h2 class="text-xl font-display tracking-wider text-red-400">PORÇÃO MISTA DE CARNES</h2>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">
+        Combinação nobre: Carne de boi, carne de porco, linguiça toscana e frango grelhado.
+      </p>
+      
+      <div class="grid grid-cols-1 gap-3" id="list-porcoes">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+    <!-- SEÇÃO: EXTRAS / ACOMPANHAMENTOS -->
+    <section id="sec-acompanhamentos" class="product-section">
+      <div class="flex items-center space-x-2 mb-3">
+        <span class="w-1.5 h-6 bg-yellow-400 rounded-full inline-block"></span>
+        <h2 class="text-xl font-display tracking-wider text-yellow-400">EXTRAS & ACOMPANHAMENTOS</h2>
+      </div>
+      
+      <div class="grid grid-cols-1 gap-3" id="list-acompanhamentos">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+    <!-- SEÇÃO: BALDES DE CERVEJA -->
+    <section id="sec-baldes" class="product-section">
+      <div class="flex items-center space-x-2 mb-3">
+        <span class="w-1.5 h-6 bg-amber-500 rounded-full inline-block"></span>
+        <h2 class="text-xl font-display tracking-wider text-amber-400">BALDE DE CERVEJA (5 UNIDADES)</h2>
+        <span id="badge-baldes-exclusivo" class="hidden text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold px-2 py-0.5 rounded-full ml-auto">
+          <i class="fa-solid fa-store mr-1"></i>Apenas Retirada
+        </span>
+      </div>
+      <p class="text-xs text-gray-400 mb-3">
+        Cervejas trincando de geladas no balde com gelo! Escolha sua favorita.
+      </p>
+
+      <!-- Aviso quando Delivery estiver ativo -->
+      <div id="alert-baldes-delivery" class="hidden bg-red-950/40 border border-red-500/40 rounded-2xl p-3.5 mb-3 flex items-start space-x-3 text-red-200">
+        <i class="fa-solid fa-triangle-exclamation text-brand-fire text-lg mt-0.5"></i>
+        <div class="text-xs">
+          <p class="font-bold text-red-300">Indisponível para Entrega (Delivery)</p>
+          <p class="text-[11px] text-gray-300 mt-0.5 leading-tight">
+            Os Baldes com gelo não possuem condições de transporte seguro via moto. Disponíveis exclusivamente para <strong>Retirada no Local</strong> ou consumo presencial.
+          </p>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 gap-3" id="list-baldes">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+    <!-- SEÇÃO: BEBIDAS -->
+    <section id="sec-bebidas" class="product-section">
+      <div class="flex items-center space-x-2 mb-3">
+        <span class="w-1.5 h-6 bg-blue-500 rounded-full inline-block"></span>
+        <h2 class="text-xl font-display tracking-wider text-blue-400">BEBIDAS & REFRIGERANTES</h2>
+      </div>
+      
+      <div class="grid grid-cols-1 gap-3" id="list-bebidas">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+    <!-- SEÇÃO: DRINKS -->
+    <section id="sec-drinks" class="product-section">
+      <div class="flex items-center space-x-2 mb-3">
+        <span class="w-1.5 h-6 bg-purple-500 rounded-full inline-block"></span>
+        <h2 class="text-xl font-display tracking-wider text-purple-400">DRINKS & COPÕES</h2>
+        <span id="badge-drinks-exclusivo" class="hidden text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold px-2 py-0.5 rounded-full ml-auto">
+          <i class="fa-solid fa-store mr-1"></i>Apenas Retirada
+        </span>
+      </div>
+
+      <!-- Aviso quando Delivery estiver ativo -->
+      <div id="alert-drinks-delivery" class="hidden bg-red-950/40 border border-red-500/40 rounded-2xl p-3.5 mb-3 flex items-start space-x-3 text-red-200">
+        <i class="fa-solid fa-triangle-exclamation text-brand-fire text-lg mt-0.5"></i>
+        <div class="text-xs">
+          <p class="font-bold text-red-300">Indisponível para Entrega (Delivery)</p>
+          <p class="text-[11px] text-gray-300 mt-0.5 leading-tight">
+            Copões e drinks abertos com gelo não possuem condições de entrega segura na moto. Disponíveis apenas para <strong>Retirada no Local</strong>.
+          </p>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 gap-3" id="list-drinks">
+        <!-- Renderizado via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BARRA FLUTUANTE INFERIOR DO CARRINHO -->
+  <div id="floatingCart" class="fixed bottom-0 inset-x-0 bg-brand-card/95 backdrop-blur-lg border-t border-brand-gold/30 p-3.5 z-40 transition-transform duration-300 shadow-2xl translate-y-full">
+    <div class="max-w-xl mx-auto flex items-center justify-between gap-3">
+      
+      <!-- Detalhes do Carrinho -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="openCartModal()">
+        <div class="relative bg-brand-gold text-brand-dark p-2.5 rounded-xl flex items-center justify-center font-bold">
+          <i class="fa-solid fa-basket-shopping text-lg"></i>
+          <span id="cartCountBadge" class="absolute -top-1.5 -right-1.5 bg-brand-fire text-white text-[11px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-brand-dark">
+            0
+          </span>
+        </div>
+        <div>
+          <span class="text-[11px] text-gray-400 font-semibold block leading-tight">Total do Pedido</span>
+          <span id="cartTotalHeader" class="text-lg font-extrabold text-white">R$ 0,00</span>
+        </div>
+      </div>
+
+      <!-- Botão Avançar / Ver Carrinho -->
+      <button onclick="openCartModal()" class="flex-1 bg-gradient-to-r from-amber-500 via-brand-gold to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-brand-dark font-black py-3 px-4 rounded-xl text-sm uppercase tracking-wider flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/20 active:scale-95 transition-all">
+        <span>Ver Pedido</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- MODAL DO CARRINHO E CHECKOUT (TELA COMPLETA) -->
+  <div id="cartModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex flex-col justify-end sm:justify-center p-0 sm:p-4">
+    <div class="bg-brand-card w-full max-w-xl mx-auto rounded-t-3xl sm:rounded-3xl border border-brand-border flex flex-col max-h-[92vh] overflow-hidden shadow-2xl animate-slide-up">
+      
+      <!-- Header do Modal -->
+      <div class="p-4 bg-brand-cardLight border-b border-brand-border flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-receipt text-brand-gold text-lg"></i>
+          <h3 class="font-display text-2xl tracking-wide text-white">Resumo do Pedido</h3>
+        </div>
+        <button onclick="closeCartModal()" class="w-8 h-8 rounded-full bg-brand-dark text-gray-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Conteúdo com Scroll -->
+      <div class="overflow-y-auto p-4 space-y-5 text-sm">
+        
+        <!-- Lista de Itens no Carrinho -->
+        <div>
+          <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+            <span>Itens Selecionados</span>
+            <span id="clearCartBtn" onclick="clearCart()" class="text-red-400 cursor-pointer hover:underline normal-case text-xs font-normal">
+              Limpar tudo
+            </span>
+          </h4>
+          <div id="cartItemsList" class="space-y-2">
+            <!-- Itens inseridos dinamicamente -->
+          </div>
+        </div>
+
+        <!-- Forma de Recebimento: Entrega ou Retirada -->
+        <div class="bg-brand-dark/70 p-3 rounded-2xl border border-brand-border">
+          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">
+            Como deseja receber?
+          </label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="btnTipoEntrega" onclick="setDeliveryType('entrega')" class="delivery-type-btn active flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-brand-gold bg-brand-gold/20 text-brand-gold font-bold text-xs transition-all">
+              <i class="fa-solid fa-motorcycle text-sm"></i>
+              <span>Entrega (Delivery)</span>
+            </button>
+            <button type="button" id="btnTipoRetirada" onclick="setDeliveryType('retirada')" class="delivery-type-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-brand-border bg-brand-card text-gray-400 font-bold text-xs transition-all">
+              <i class="fa-solid fa-store text-sm"></i>
+              <span>Retirada no Local</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dados do Cliente -->
+        <div class="bg-brand-dark/70 p-3 rounded-2xl border border-brand-border space-y-3">
+          <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-user text-brand-gold"></i> Seus Dados
+          </h4>
+
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Seu Nome *</label>
+            <input type="text" id="custName" placeholder="Ex: Lucas Silva" oninput="syncCustomerData('name', this.value)" class="w-full bg-brand-card border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+          </div>
+
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Seu Telefone / WhatsApp *</label>
+            <input type="tel" id="custPhone" placeholder="(21) 99999-9999" oninput="syncCustomerData('phone', this.value)" class="w-full bg-brand-card border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+          </div>
+
+          <!-- Campos de Endereço (condicionais para entrega) -->
+          <div id="addressSection" class="space-y-2 pt-1 border-t border-brand-border/60">
+            <label class="block text-xs text-yellow-400 font-semibold mb-1">
+              <i class="fa-solid fa-map-pin mr-1"></i> Endereço para Entrega *
+            </label>
+            
+            <div class="grid grid-cols-3 gap-2">
+              <input type="text" id="custStreet" placeholder="Rua / Avenida" oninput="syncCustomerData('street', this.value)" class="col-span-2 bg-brand-card border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+              <input type="text" id="custNumber" placeholder="Nº" oninput="syncCustomerData('number', this.value)" class="bg-brand-card border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <input type="text" id="custNeighborhood" placeholder="Bairro" oninput="syncCustomerData('neighborhood', this.value)" class="bg-brand-card border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+              <input type="text" id="custComplement" placeholder="Apto / Bloco / Ref." oninput="syncCustomerData('complement', this.value)" class="bg-brand-card border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+            </div>
+            
+            <p class="text-[11px] text-gray-400 italic">
+              * A taxa de entrega será calculada pela assistente de acordo com o bairro/distância.
+            </p>
+          </div>
+        </div>
+
+        <!-- Forma de Pagamento -->
+        <div class="bg-brand-dark/70 p-3 rounded-2xl border border-brand-border space-y-3">
+          <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-credit-card text-brand-gold"></i> Forma de Pagamento
+          </h4>
+
+          <div class="grid grid-cols-3 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="paymentMethod" value="PIX" checked onchange="togglePaymentDetails()" class="peer sr-only">
+              <div class="text-center p-2 rounded-xl border border-brand-border peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10 peer-checked:text-emerald-400 transition-all">
+                <i class="fa-brands fa-pix text-lg block mb-0.5"></i>
+                <span class="text-xs font-bold block">PIX</span>
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="paymentMethod" value="Cartão" onchange="togglePaymentDetails()" class="peer sr-only">
+              <div class="text-center p-2 rounded-xl border border-brand-border peer-checked:border-brand-gold peer-checked:bg-brand-gold/10 peer-checked:text-yellow-400 transition-all">
+                <i class="fa-solid fa-credit-card text-lg block mb-0.5"></i>
+                <span class="text-xs font-bold block">Cartão</span>
+              </div>
+            </label>
+
+            <label class="cursor-pointer">
+              <input type="radio" name="paymentMethod" value="Dinheiro" onchange="togglePaymentDetails()" class="peer sr-only">
+              <div class="text-center p-2 rounded-xl border border-brand-border peer-checked:border-brand-gold peer-checked:bg-brand-gold/10 peer-checked:text-yellow-400 transition-all">
+                <i class="fa-solid fa-money-bill-wave text-lg block mb-0.5"></i>
+                <span class="text-xs font-bold block">Dinheiro</span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Detalhes do Pagamento -->
+          <div id="pixNotice" class="bg-emerald-950/40 border border-emerald-500/30 p-2.5 rounded-xl text-xs text-emerald-300 flex items-start space-x-2">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-sm mt-0.5"></i>
+            <div>
+              <span class="font-bold block">Assistente Virtual com QR Code PIX</span>
+              <span>Assim que você enviar este pedido, a assistente da loja enviará a chave e o QR Code oficial para pagamento instantâneo.</span>
+            </div>
+          </div>
+
+          <div id="cashDetails" class="hidden space-y-1">
+            <label class="block text-xs text-gray-400">Precisa de troco para quanto?</label>
+            <input type="text" id="changeAmount" placeholder="Ex: R$ 50,00 ou Não preciso" class="w-full bg-brand-card border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+          </div>
+
+          <div id="cardDetails" class="hidden space-y-1">
+            <label class="block text-xs text-gray-400">Qual modalidade de cartão?</label>
+            <select id="cardType" class="w-full bg-brand-card border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Observações do Pedido -->
+        <div class="bg-brand-dark/70 p-3 rounded-2xl border border-brand-border">
+          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">
+            <i class="fa-regular fa-comment-dots mr-1 text-brand-gold"></i> Alguma observação?
+          </label>
+          <textarea id="orderNotes" rows="2" placeholder="Ex: Sem cebola no vinagrete, carne mais bem passada, ponto da carne..." class="w-full bg-brand-card border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold resize-none"></textarea>
+        </div>
+
+        <!-- Seletor do WhatsApp da Loja -->
+        <div class="bg-brand-dark/70 p-3 rounded-2xl border border-brand-border flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold text-gray-300 block">Enviar para WhatsApp:</span>
+            <span class="text-[11px] text-gray-400">Linha oficial de pedidos da loja</span>
+          </div>
+          <select id="shopWhatsappNumber" class="bg-brand-card border border-brand-border rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:border-brand-gold">
+            <option value="5521990285734" selected>(21) 99028-5734 (Oficial)</option>
+            <option value="5521973471919">(21) 97347-1919 (Linha 2)</option>
+          </select>
+        </div>
+
+        <!-- Resumo de Valores -->
+        <div class="border-t border-brand-border pt-3 space-y-1.5 text-xs">
+          <div class="flex justify-between text-gray-400">
+            <span>Subtotal</span>
+            <span id="modalSubtotal" class="font-bold text-gray-200">R$ 0,00</span>
+          </div>
+          <div class="flex justify-between text-gray-400">
+            <span>Taxa de Entrega</span>
+            <span id="modalDeliveryTax" class="font-bold text-yellow-400">A calcular</span>
+          </div>
+          <div class="flex justify-between text-base font-extrabold text-white pt-2 border-t border-brand-border/60">
+            <span>Total dos Itens</span>
+            <span id="modalTotal" class="text-brand-gold text-lg">R$ 0,00</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer com Botão de Enviar Pedido -->
+      <div class="p-4 bg-brand-cardLight border-t border-brand-border space-y-2">
+        <button onclick="submitOrderToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-2xl text-base flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 active:scale-98 transition-all">
+          <i class="fa-brands fa-whatsapp text-2xl"></i>
+          <span>ENVIAR PEDIDO NO WHATSAPP</span>
+        </button>
+        <p class="text-[11px] text-center text-gray-400">
+          O pedido será enviado formatado e a assistente virtual enviará o QR Code do PIX.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL DE OPÇÃO / SABOR (Ex: Cerveja do Balde, Sabor de Refri 1.5L, Tipo de Água) -->
+  <div id="optionModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-brand-card w-full max-w-sm rounded-3xl border border-brand-border p-5 shadow-2xl animate-scale-up space-y-4">
+      <div class="flex justify-between items-center border-b border-brand-border pb-3">
+        <h3 id="optionModalTitle" class="font-bold text-base text-yellow-400">Escolha a Opção</h3>
+        <button onclick="closeOptionModal()" class="w-7 h-7 rounded-full bg-brand-dark text-gray-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p id="optionModalSubtitle" class="text-xs text-gray-300"></p>
+
+      <!-- Lista de Opções -->
+      <div id="optionModalChoices" class="space-y-2">
+        <!-- Renderizado dinamicamente -->
+      </div>
+
+      <button id="optionModalConfirmBtn" class="w-full bg-brand-gold text-brand-dark font-extrabold py-2.5 rounded-xl text-sm uppercase tracking-wider hover:bg-yellow-400 transition-all">
+        Confirmar Escolha
+      </button>
+    </div>
+  </div>
+
+  <!-- NOTIFICAÇÃO TOAST -->
+  <div id="toast" class="fixed top-5 right-5 z-50 bg-brand-card border border-brand-gold/60 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold">
+      <i class="fa-solid fa-check"></i>
+    </div>
+    <span id="toastMessage" class="text-xs font-bold">Item adicionado ao pedido!</span>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

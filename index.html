@@ -249,6 +249,30 @@
       </div>
     </div>
 
+    
+        <!-- Barra de Identificação / Passo 1: Localização -->
+        <div id="customerLocationBar" onclick="openWelcomeModal()" class="mt-3 w-full bg-gradient-to-r from-brand-card via-brand-dark to-brand-card hover:border-brand-gold border border-brand-gold/40 rounded-2xl p-3 flex items-center justify-between text-left cursor-pointer transition-all shadow-lg group">
+          <div class="flex items-center space-x-3 min-w-0">
+            <div id="locationBarIcon" class="w-9 h-9 rounded-xl bg-brand-gold/15 text-brand-gold border border-brand-gold/30 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+              <i class="fa-solid fa-motorcycle text-base"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span id="locationBarBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-brand-gold text-brand-dark tracking-wider">Passo 1</span>
+                <p id="locationBarTitle" class="text-xs font-bold text-white truncate">
+                  Consultar entrega no seu endereço
+                </p>
+              </div>
+              <p id="locationBarSubtitle" class="text-[11px] text-gray-300 truncate mt-0.5">
+                📍 Toque aqui para saber se entregamos na sua casa ou se prefere retirar
+              </p>
+            </div>
+          </div>
+          <button type="button" class="text-xs font-extrabold text-brand-gold bg-brand-gold/10 group-hover:bg-brand-gold group-hover:text-brand-dark px-3 py-1.5 rounded-xl border border-brand-gold/40 transition-all flex-shrink-0 ml-2">
+            Definir
+          </button>
+        </div>
+
     <!-- Filtro de Categorias (Barra Deslizante) -->
     <nav class="sticky top-0 z-30 bg-brand-dark/95 backdrop-blur-md border-y border-brand-border py-2 px-3 overflow-x-auto no-scrollbar shadow-md">
       <div class="flex space-x-2 max-w-xl mx-auto w-max px-1" id="categoryNav">
@@ -658,6 +682,122 @@
     </div>
     <span id="toastMessage" class="text-xs font-bold">Item adicionado ao pedido!</span>
   </div>
+
+  <!-- MODAL DO PASSO 1: IDENTIFICAÇÃO E VERIFICAÇÃO DE ENTREGA -->
+  <div id="welcomeModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-brand-card w-full max-w-lg rounded-3xl border border-brand-border p-5 shadow-2xl animate-scale-up space-y-4 my-auto max-h-[95vh] overflow-y-auto no-scrollbar">
+      
+      <!-- Cabeçalho do Modal -->
+      <div class="flex justify-between items-start border-b border-brand-border pb-3">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-fire to-brand-gold flex items-center justify-center text-brand-dark font-extrabold text-xl shadow-lg">
+            <i class="fa-solid fa-fire text-black"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-brand-gold/20 text-brand-gold border border-brand-gold/40">Passo 1 de 2</span>
+            <h3 class="font-extrabold text-base sm:text-lg text-white">Como deseja receber seu pedido?</h3>
+          </div>
+        </div>
+        <button type="button" onclick="closeWelcomeModal()" class="w-8 h-8 rounded-full bg-brand-dark/80 text-gray-400 hover:text-white flex items-center justify-center border border-brand-border transition-all" title="Fechar e ver cardápio">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-300 leading-relaxed">
+        Bem-vindo ao <strong>Churrasquinho do Ivanzinho</strong>! Informe seu nome e endereço abaixo para saber se <strong>entregamos na sua residência</strong> antes de escolher os itens.
+      </p>
+
+      <!-- Seletor: Entrega x Retirada -->
+      <div class="grid grid-cols-2 gap-2 p-1 bg-brand-dark rounded-2xl border border-brand-border">
+        <button type="button" id="welcomeBtnEntrega" onclick="setWelcomeType('entrega')" class="delivery-type-btn active flex items-center justify-center space-x-2 py-3 px-3 rounded-xl font-bold text-xs transition-all">
+          <i class="fa-solid fa-motorcycle text-sm"></i>
+          <span>Entrega (Delivery)</span>
+        </button>
+        <button type="button" id="welcomeBtnRetirada" onclick="setWelcomeType('retirada')" class="delivery-type-btn flex items-center justify-center space-x-2 py-3 px-3 rounded-xl font-bold text-xs transition-all text-gray-400 hover:text-white">
+          <i class="fa-solid fa-store text-sm"></i>
+          <span>Retirada no Balcão</span>
+        </button>
+      </div>
+
+      <!-- Nome do Cliente (Obrigatório em ambos) -->
+      <div>
+        <label class="block text-xs font-bold text-gray-300 mb-1">
+          <i class="fa-solid fa-user text-brand-gold mr-1"></i> Seu Nome *
+        </label>
+        <input type="text" id="welcomeCustName" placeholder="Ex: Lucas Silva" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold">
+      </div>
+
+      <!-- SEÇÃO ENTREGA: CEP e Endereço -->
+      <div id="welcomeDeliverySection" class="space-y-3 pt-1">
+        <div>
+          <label class="block text-xs font-bold text-yellow-400 mb-1">
+            <i class="fa-solid fa-map-pin mr-1"></i> Endereço de Entrega *
+          </label>
+          <div class="grid grid-cols-3 gap-2">
+            <input type="text" id="welcomeCustCep" inputmode="numeric" maxlength="9" placeholder="CEP (ex: 23050-000)" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+            <span id="welcomeCepStatus" class="col-span-2 self-center text-[11px] text-gray-400">Digite o CEP para buscar a rua</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <input type="text" id="welcomeCustStreet" placeholder="Rua / Avenida" class="col-span-2 bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+          <input type="text" id="welcomeCustNumber" placeholder="Nº" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="welcomeCustNeighborhood" placeholder="Bairro (ex: Campo Grande)" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+          <input type="text" id="welcomeCustComplement" placeholder="Apto / Bloco / Ref." class="bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-gold">
+        </div>
+
+        <!-- Botões de Ação para Checar Entrega -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button type="button" id="btnWelcomeCheckAddress" onclick="verifyWelcomeDeliveryAddress()" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-gradient-to-r from-brand-gold to-yellow-500 hover:brightness-110 text-black font-extrabold text-xs shadow-md transition-all">
+            <i class="fa-solid fa-location-crosshairs"></i>
+            <span>Verificar se Entrega</span>
+          </button>
+          <button type="button" onclick="useWelcomeLocationGPS()" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border border-brand-border bg-brand-dark hover:border-brand-gold text-gray-200 font-bold text-xs transition-all">
+            <i class="fa-solid fa-crosshairs text-brand-gold"></i>
+            <span>Usar meu GPS</span>
+          </button>
+        </div>
+
+        <!-- Feedback de Entrega (Sucesso ou Fora da Área) -->
+        <div id="welcomeDeliveryStatus" class="hidden text-xs rounded-xl p-3 leading-relaxed border transition-all"></div>
+      </div>
+
+      <!-- SEÇÃO RETIRADA -->
+      <div id="welcomeRetiradaSection" class="hidden space-y-3 pt-1">
+        <div class="bg-brand-dark p-3 rounded-2xl border border-brand-border/80 space-y-2">
+          <div class="flex items-center space-x-2 text-brand-gold font-bold text-xs">
+            <i class="fa-solid fa-store"></i>
+            <span>Endereço para Retirada no Balcão:</span>
+          </div>
+          <p class="text-xs text-gray-200 font-semibold">
+            Rua Domingos Alves Ribeiro, 32 - Campo Grande, Rio de Janeiro / RJ
+          </p>
+          <p class="text-[11px] text-gray-400">
+            🕒 Quarta a Sexta: a partir das 19h | Sábado e Domingo: das 12h às 23h
+          </p>
+        </div>
+      </div>
+
+      <!-- Botão Principal de Conclusão do Passo 1 -->
+      <div class="pt-2 border-t border-brand-border space-y-2">
+        <button type="button" id="btnConfirmWelcomeStep" onclick="confirmWelcomeStep()" class="w-full bg-gradient-to-r from-brand-gold via-yellow-400 to-amber-500 hover:brightness-110 text-brand-dark font-extrabold py-3.5 px-4 rounded-2xl text-sm uppercase tracking-wider flex items-center justify-center space-x-2 shadow-lg shadow-brand-gold/20 transition-all">
+          <i class="fa-solid fa-utensils"></i>
+          <span id="btnConfirmWelcomeText">Confirmar e Abrir Cardápio</span>
+        </button>
+        
+        <p class="text-center">
+          <button type="button" onclick="closeWelcomeModal()" class="text-[11px] text-gray-400 hover:text-gray-200 underline">
+            Quero apenas dar uma olhada no cardápio primeiro
+          </button>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
 
   <script>
 //---------------------------------------------------------------------
@@ -4144,6 +4284,347 @@ setInterval(() => {
   }
 }, 60 * 1000);
 
-  </script>
+  
+
+// =====================================================================
+// PASSO 1: FLUXO DE IDENTIFICAÇÃO E VERIFICAÇÃO DE ENTREGA (DELIVERY / RETIRADA)
+// =====================================================================
+
+let welcomeCurrentType = 'entrega';
+let welcomeVerified = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+  setupWelcomeCepField();
+  initWelcomeCustomerState();
+});
+
+function initWelcomeCustomerState() {
+  const saved = localStorage.getItem('ivanzinho_customer_pref');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      applySavedCustomerState(data);
+      return;
+    } catch (e) {
+      console.warn('Erro ao ler dados salvos do cliente:', e);
+    }
+  }
+
+  // Se não tem cadastro prévio, abre o modal do Passo 1 automaticamente após 350ms
+  setTimeout(() => {
+    openWelcomeModal();
+  }, 350);
+}
+
+function openWelcomeModal() {
+  const modal = document.getElementById('welcomeModal');
+  if (!modal) return;
+
+  // Se já tiver dados preenchidos no checkout, copia para o modal do Passo 1
+  const saved = localStorage.getItem('ivanzinho_customer_pref');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      document.getElementById('welcomeCustName').value = data.name || '';
+      if (data.type === 'entrega') {
+        document.getElementById('welcomeCustCep').value = data.cep || '';
+        document.getElementById('welcomeCustStreet').value = data.street || '';
+        document.getElementById('welcomeCustNumber').value = data.number || '';
+        document.getElementById('welcomeCustNeighborhood').value = data.neighborhood || '';
+        document.getElementById('welcomeCustComplement').value = data.complement || '';
+        setWelcomeType('entrega');
+        if (data.distanceKm) {
+          showWelcomeDeliveryStatus('success', `<i class="fa-solid fa-circle-check mr-1"></i><strong>Endereço aprovado!</strong> Distância calculada: ~${formatKm(data.distanceKm)}.`);
+          welcomeVerified = true;
+        }
+      } else {
+        setWelcomeType('retirada');
+      }
+    } catch (e) {}
+  }
+
+  modal.classList.remove('hidden');
+  document.body.classList.add('overflow-hidden');
+}
+
+function closeWelcomeModal() {
+  const modal = document.getElementById('welcomeModal');
+  if (modal) modal.classList.add('hidden');
+  document.body.classList.remove('overflow-hidden');
+}
+
+function setWelcomeType(type) {
+  welcomeCurrentType = type;
+  const btnEntrega = document.getElementById('welcomeBtnEntrega');
+  const btnRetirada = document.getElementById('welcomeBtnRetirada');
+  const secEntrega = document.getElementById('welcomeDeliverySection');
+  const secRetirada = document.getElementById('welcomeRetiradaSection');
+  const btnText = document.getElementById('btnConfirmWelcomeText');
+
+  if (type === 'entrega') {
+    btnEntrega.className = 'delivery-type-btn active flex items-center justify-center space-x-2 py-3 px-3 rounded-xl font-bold text-xs transition-all';
+    btnRetirada.className = 'delivery-type-btn flex items-center justify-center space-x-2 py-3 px-3 rounded-xl font-bold text-xs transition-all text-gray-400 hover:text-white';
+    secEntrega.classList.remove('hidden');
+    secRetirada.classList.add('hidden');
+    btnText.innerText = 'Confirmar Endereço e Abrir Cardápio';
+  } else {
+    btnRetirada.className = 'delivery-type-btn active flex items-center justify-center space-x-2 py-3 px-3 rounded-xl font-bold text-xs transition-all';
+    btnEntrega.className = 'delivery-type-btn flex items-center justify-center space-x-2 py-3 px-3 rounded-xl font-bold text-xs transition-all text-gray-400 hover:text-white';
+    secEntrega.classList.add('hidden');
+    secRetirada.classList.remove('hidden');
+    btnText.innerText = 'Confirmar Retirada e Abrir Cardápio';
+  }
+}
+
+function setupWelcomeCepField() {
+  const cepInput = document.getElementById('welcomeCustCep');
+  if (!cepInput) return;
+
+  cepInput.addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+    e.target.value = v.length > 5 ? `${v.slice(0, 5)}-${v.slice(5)}` : v;
+    if (v.length === 8) lookupWelcomeCep(v);
+  });
+}
+
+async function lookupWelcomeCep(cep) {
+  const status = document.getElementById('welcomeCepStatus');
+  status.className = 'col-span-2 self-center text-[11px] text-gray-400';
+  status.innerText = 'Buscando CEP...';
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await res.json();
+    if (data.erro) throw new Error('CEP não encontrado');
+
+    if (data.logradouro) document.getElementById('welcomeCustStreet').value = data.logradouro;
+    if (data.bairro) document.getElementById('welcomeCustNeighborhood').value = data.bairro;
+    status.className = 'col-span-2 self-center text-[11px] text-emerald-400 font-semibold';
+    status.innerHTML = '<i class="fa-solid fa-check mr-1"></i>CEP Encontrado';
+    
+    // Foca no número automaticamente para facilitar o usuário
+    document.getElementById('welcomeCustNumber').focus();
+  } catch (err) {
+    status.className = 'col-span-2 self-center text-[11px] text-amber-400';
+    status.innerText = 'CEP não encontrado. Preencha manualmente.';
+  }
+}
+
+async function verifyWelcomeDeliveryAddress() {
+  const street = document.getElementById('welcomeCustStreet').value.trim();
+  const number = document.getElementById('welcomeCustNumber').value.trim();
+  const neighborhood = document.getElementById('welcomeCustNeighborhood').value.trim();
+  const cep = document.getElementById('welcomeCustCep').value.replace(/\D/g, '');
+
+  if (!street || !neighborhood) {
+    showWelcomeDeliveryStatus('error', 'Por favor, informe a Rua e o Bairro para calcularmos a entrega.');
+    return;
+  }
+
+  showWelcomeDeliveryStatus('info', '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Calculando distância até a loja em Campo Grande...');
+
+  const coords = await geocodeAddress({ street, number, neighborhood, cep });
+  if (!coords) {
+    showWelcomeDeliveryStatus('error', 'Não conseguimos localizar esse endereço no mapa. Confira os dados ou toque em <strong>"Usar meu GPS"</strong>.');
+    return;
+  }
+
+  applyWelcomeDeliveryResult(coords.lat, coords.lng);
+}
+
+function useWelcomeLocationGPS() {
+  if (!navigator.geolocation) {
+    showWelcomeDeliveryStatus('error', 'Seu navegador não tem suporte a GPS.');
+    return;
+  }
+
+  showWelcomeDeliveryStatus('info', '<i class="fa-solid fa-spinner fa-spin mr-1.5"></i>Obtendo sua localização via GPS...');
+
+  navigator.geolocation.getCurrentPosition(
+    pos => applyWelcomeDeliveryResult(pos.coords.latitude, pos.coords.longitude),
+    () => {
+      showWelcomeDeliveryStatus('error', 'Não foi possível obter sua localização. Permita o GPS ou digite seu endereço.');
+    },
+    { enableHighAccuracy: true, timeout: 15000 }
+  );
+}
+
+function applyWelcomeDeliveryResult(lat, lng) {
+  const distanceKm = haversineKm(STORE_LOCATION.lat, STORE_LOCATION.lng, lat, lng);
+  const ok = distanceKm <= MAX_DELIVERY_KM;
+
+  deliveryCheck = { status: ok ? 'ok' : 'out', distanceKm, lat, lng, source: 'passo1' };
+
+  if (ok) {
+    welcomeVerified = true;
+    showWelcomeDeliveryStatus('success', `
+      <div class="flex items-start space-x-2">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-base mt-0.5"></i>
+        <div>
+          <strong class="text-emerald-300 block text-sm">Entregamos no seu endereço!</strong>
+          <span class="text-gray-200">Distância calculada: <strong>~${formatKm(distanceKm)}</strong> da nossa loja.</span><br>
+          <span class="text-amber-400 font-bold">Taxa de entrega: R$ 5,00 • Tempo estimado: 35-50 min</span>
+        </div>
+      </div>
+    `);
+  } else {
+    welcomeVerified = false;
+    showWelcomeDeliveryStatus('error', `
+      <div class="flex items-start space-x-2">
+        <i class="fa-solid fa-circle-xmark text-red-400 text-base mt-0.5"></i>
+        <div>
+          <strong class="text-red-300 block text-sm">Endereço fora do raio de entrega de moto.</strong>
+          <span class="text-gray-200">Seu endereço fica a <strong>${formatKm(distanceKm)}</strong> da loja (limite: ${MAX_DELIVERY_KM} km).</span><br>
+          <span class="text-gray-300 block mt-1">Mas você pode fazer o pedido online e retirar quentinho no nosso balcão!</span>
+          <button type="button" onclick="setWelcomeType('retirada')" class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-gold text-black font-extrabold text-xs shadow-md">
+            <i class="fa-solid fa-store"></i> Trocar para Retirada no Balcão
+          </button>
+        </div>
+      </div>
+    `);
+  }
+}
+
+function showWelcomeDeliveryStatus(type, html) {
+  const box = document.getElementById('welcomeDeliveryStatus');
+  if (!box) return;
+  box.classList.remove('hidden');
+
+  const styles = {
+    success: 'bg-emerald-950/80 border-emerald-500/60 text-emerald-200',
+    error: 'bg-red-950/80 border-red-500/60 text-red-200',
+    info: 'bg-brand-dark border-brand-border text-gray-200'
+  };
+
+  box.className = `text-xs rounded-xl p-3 leading-relaxed border transition-all ${styles[type]}`;
+  box.innerHTML = html;
+}
+
+async function confirmWelcomeStep() {
+  const name = document.getElementById('welcomeCustName').value.trim();
+  if (!name) {
+    alert('Por favor, informe o seu Nome.');
+    document.getElementById('welcomeCustName').focus();
+    return;
+  }
+
+  if (welcomeCurrentType === 'entrega') {
+    const street = document.getElementById('welcomeCustStreet').value.trim();
+    const number = document.getElementById('welcomeCustNumber').value.trim();
+    const neighborhood = document.getElementById('welcomeCustNeighborhood').value.trim();
+    const cep = document.getElementById('welcomeCustCep').value.trim();
+    const complement = document.getElementById('welcomeCustComplement').value.trim();
+
+    if (!street || !neighborhood) {
+      alert('Por favor, informe a Rua e o Bairro para entrega.');
+      document.getElementById('welcomeCustStreet').focus();
+      return;
+    }
+
+    // Se ainda não verificou a distância, tenta verificar agora
+    if (!welcomeVerified) {
+      showWelcomeDeliveryStatus('info', '<i class="fa-solid fa-spinner fa-spin mr-1"></i>Aguarde, verificando seu endereço...');
+      const coords = await geocodeAddress({ street, number, neighborhood, cep });
+      if (!coords) {
+        showWelcomeDeliveryStatus('error', 'Endereço não localizado no mapa. Verifique a rua e bairro ou use o GPS.');
+        return;
+      }
+      applyWelcomeDeliveryResult(coords.lat, coords.lng);
+      if (!welcomeVerified) return; // Fora do raio
+    }
+
+    const customerData = {
+      type: 'entrega',
+      name: name,
+      cep: cep,
+      street: street,
+      number: number,
+      neighborhood: neighborhood,
+      complement: complement,
+      distanceKm: deliveryCheck.distanceKm,
+      lat: deliveryCheck.lat,
+      lng: deliveryCheck.lng,
+      verified: true
+    };
+
+    localStorage.setItem('ivanzinho_customer_pref', JSON.stringify(customerData));
+    applySavedCustomerState(customerData);
+    closeWelcomeModal();
+    showToast(`Olá, ${name}! Entregamos no seu endereço. Aproveite o cardápio! 🥩🔥`);
+
+  } else {
+    // Retirada no balcão
+    const customerData = {
+      type: 'retirada',
+      name: name,
+      verified: true
+    };
+
+    localStorage.setItem('ivanzinho_customer_pref', JSON.stringify(customerData));
+    applySavedCustomerState(customerData);
+    closeWelcomeModal();
+    showToast(`Olá, ${name}! Pedido configurado para Retirada no Balcão. 🛍️`);
+  }
+}
+
+function applySavedCustomerState(data) {
+  // 1. Atualiza os campos do checkout padrão
+  if (data.name) {
+    const elName = document.getElementById('custName');
+    if (elName) elName.value = data.name;
+  }
+
+  if (data.type === 'entrega') {
+    setDeliveryType('entrega');
+    if (data.cep) document.getElementById('custCep').value = data.cep;
+    if (data.street) document.getElementById('custStreet').value = data.street;
+    if (data.number) document.getElementById('custNumber').value = data.number;
+    if (data.neighborhood) document.getElementById('custNeighborhood').value = data.neighborhood;
+    if (data.complement) document.getElementById('custComplement').value = data.complement;
+
+    deliveryCheck = {
+      status: 'ok',
+      distanceKm: data.distanceKm || 2.0,
+      lat: data.lat,
+      lng: data.lng,
+      source: 'saved'
+    };
+
+    // 2. Atualiza a barra de localização no topo
+    updateTopLocationBar('entrega', data);
+
+  } else {
+    setDeliveryType('retirada');
+    deliveryCheck = { status: 'ok', distanceKm: 0, lat: null, lng: null, source: 'retirada' };
+    updateTopLocationBar('retirada', data);
+  }
+}
+
+function updateTopLocationBar(type, data) {
+  const bar = document.getElementById('customerLocationBar');
+  const title = document.getElementById('locationBarTitle');
+  const subtitle = document.getElementById('locationBarSubtitle');
+  const badge = document.getElementById('locationBarBadge');
+  const icon = document.getElementById('locationBarIcon');
+
+  if (!bar || !title || !subtitle) return;
+
+  if (type === 'entrega') {
+    icon.innerHTML = '<i class="fa-solid fa-motorcycle text-base text-emerald-400"></i>';
+    icon.className = 'w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center flex-shrink-0';
+    badge.innerText = 'Entrega Confirmada';
+    badge.className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-500 text-black tracking-wider';
+    title.innerHTML = `🛵 Entregar para: <span class="text-white font-bold">${data.name}</span>`;
+    subtitle.innerHTML = `📍 ${data.street || ''}${data.number ? ', ' + data.number : ''} - ${data.neighborhood || ''} ${data.distanceKm ? `(~${formatKm(data.distanceKm)})` : ''}`;
+  } else {
+    icon.innerHTML = '<i class="fa-solid fa-store text-base text-amber-400"></i>';
+    icon.className = 'w-9 h-9 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center flex-shrink-0';
+    badge.innerText = 'Retirada no Balcão';
+    badge.className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-brand-gold text-black tracking-wider';
+    title.innerHTML = `🛍️ Retirada para: <span class="text-white font-bold">${data.name}</span>`;
+    subtitle.innerHTML = `📍 Rua Domingos Alves Ribeiro, 32 - Campo Grande`;
+  }
+}
+
+</script>
 </body>
 </html>

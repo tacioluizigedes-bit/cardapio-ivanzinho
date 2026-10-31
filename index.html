@@ -272,29 +272,29 @@
       </div>
     </div>
 
-    <!-- Filtro de Categorias (Barra Deslizante) -->
-    <nav class="sticky top-0 z-30 bg-brand-dark/95 backdrop-blur-md py-2.5 px-4 shadow-lg shadow-black/30">
-      <div class="flex space-x-2 max-w-xl mx-auto overflow-x-auto no-scrollbar justify-start sm:justify-center py-0.5" id="categoryNav">
-        <button onclick="filterCategory('todos')" class="category-btn active px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
-          <i class="fa-solid fa-fire"></i> Todos
+    <!-- Filtro de Categorias (Todas as opções visíveis e sem travar a tela) -->
+    <nav class="py-2.5 px-3 bg-brand-dark/70">
+      <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-xl mx-auto" id="categoryNav">
+        <button onclick="filterCategory('todos')" class="category-btn active px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-fire text-amber-400"></i> Todos
         </button>
-        <button onclick="filterCategory('refeicoes')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
-          <i class="fa-solid fa-plate-wheat"></i> Refeições
+        <button onclick="filterCategory('refeicoes')" class="category-btn px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-plate-wheat text-amber-400"></i> Refeições
         </button>
-        <button onclick="filterCategory('porcoes')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
-          <i class="fa-solid fa-drumstick-bite"></i> Porções
+        <button onclick="filterCategory('porcoes')" class="category-btn px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-drumstick-bite text-amber-400"></i> Porções
         </button>
-        <button onclick="filterCategory('acompanhamentos')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
-          <i class="fa-solid fa-bowl-rice"></i> Extras
+        <button onclick="filterCategory('acompanhamentos')" class="category-btn px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-bowl-rice text-amber-400"></i> Extras
         </button>
-        <button onclick="filterCategory('baldes')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
-          <i class="fa-solid fa-beer-mug-empty"></i> Baldes
+        <button onclick="filterCategory('baldes')" class="category-btn px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-beer-mug-empty text-amber-400"></i> Baldes
         </button>
-        <button onclick="filterCategory('bebidas')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
-          <i class="fa-solid fa-wine-bottle"></i> Bebidas
+        <button onclick="filterCategory('bebidas')" class="category-btn px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-wine-bottle text-blue-400"></i> Bebidas
         </button>
-        <button onclick="filterCategory('drinks')" class="category-btn px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
-          <i class="fa-solid fa-martini-glass-citrus"></i> Drinks
+        <button onclick="filterCategory('drinks')" class="category-btn px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5">
+          <i class="fa-solid fa-martini-glass-citrus text-purple-400"></i> Drinks
         </button>
       </div>
     </nav>
@@ -3620,22 +3620,23 @@ function filterCategory(cat) {
   const buttons = document.querySelectorAll('.category-btn');
   buttons.forEach(btn => btn.classList.remove('active'));
   
-  // Acha o botão clicado
-  const activeBtn = Array.from(buttons).find(b => b.getAttribute('onclick').includes(cat));
+  const activeBtn = Array.from(buttons).find(b => {
+    const onc = b.getAttribute('onclick') || '';
+    return onc.includes(`'${cat}'`);
+  });
   if (activeBtn) activeBtn.classList.add('active');
 
   const sections = document.querySelectorAll('.product-section');
+  sections.forEach(s => s.classList.remove('hidden'));
+
   if (cat === 'todos') {
-    sections.forEach(s => s.classList.remove('hidden'));
+    const firstSec = document.getElementById('sec-refeicoes');
+    if (firstSec) firstSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else {
-    sections.forEach(s => {
-      if (s.id === `sec-${cat}`) {
-        s.classList.remove('hidden');
-        s.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        s.classList.add('hidden');
-      }
-    });
+    const target = document.getElementById(`sec-${cat}`);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }
 

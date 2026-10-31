@@ -3564,6 +3564,7 @@ let pendingOptionProduct = null;
 // Inicialização da Página
 document.addEventListener('DOMContentLoaded', () => {
   renderAllProducts();
+  syncDeliveryRestrictions();
   loadCartFromStorage();
   updateCartUI();
   setupPhoneMask();
@@ -3605,16 +3606,8 @@ function renderAllProducts() {
       </div>
       
       <!-- Controles de Quantidade -->
-      <div class="flex items-center space-x-1.5 flex-shrink-0">
-        <button onclick="handleDecrease('${prod.id}')" class="qty-btn qty-btn-minus" title="Diminuir">
-          <i class="fa-solid fa-minus text-xs"></i>
-        </button>
-        <span id="qty-display-${prod.id}" class="w-6 text-center font-bold text-sm text-white">
-          ${currentQty}
-        </span>
-        <button onclick="handleIncrease('${prod.id}')" class="qty-btn qty-btn-plus shadow-md" title="Adicionar">
-          <i class="fa-solid fa-plus text-xs"></i>
-        </button>
+      <div class="product-controls-area flex items-center flex-shrink-0">
+        ${renderCardControlsHtml(prod)}
       </div>
     `;
 
@@ -3651,6 +3644,11 @@ function filterCategory(cat) {
 function handleIncrease(productId) {
   const prod = products.find(p => p.id === productId);
   if (!prod) return;
+
+  if (currentDeliveryType === 'entrega' && (prod.category === 'baldes' || prod.category === 'drinks')) {
+    alert('Não é possível a entrega deste item (' + prod.name + ') via delivery. Disponível apenas para Retirada no Balcão.');
+    return;
+  }
 
   if (prod.hasOptions) {
     // Abre modal para escolher a opção/sabor
@@ -3912,8 +3910,8 @@ function setDeliveryType(type) {
     modalDeliveryTax.innerText = 'Grátis (Retirada no balcão)';
   }
   updateCartUI();
+  syncDeliveryRestrictions();
 }
-
 // Dados da conta PIX do Churrasquinho (extraídos do QR Code oficial do Nubank)
 const PIX_INFO = {
   favorecido: '53.097.813 IVANO DE ALMEIDA RIBEIRO',
@@ -4622,6 +4620,122 @@ function updateTopLocationBar(type, data) {
     badge.className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-brand-gold text-black tracking-wider';
     title.innerHTML = `🛍️ Retirada para: <span class="text-white font-bold">${data.name}</span>`;
     subtitle.innerHTML = `📍 Rua Domingos Alves Ribeiro, 32 - Campo Grande`;
+  }
+}
+
+
+
+// Helper para renderizar controles ou badge de restrição de entrega
+function renderCardControlsHtml(prod) {
+  const isDelivery = (currentDeliveryType === 'entrega');
+  const isRestricted = isDelivery && (prod.category === 'baldes' || prod.category === 'drinks');
+
+  if (isRestricted) {
+    return `
+      <div class="flex items-center flex-shrink-0">
+        <span class="text-[11px] font-bold text-red-300 bg-red-950/80 border border-red-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-sm select-none" title="Não é possível a entrega deste item">
+          <i class="fa-solid fa-ban text-[10px] text-red-400"></i> Não disponível para entrega
+        </span>
+      </div>
+    `;
+  }
+
+  const currentQty = getTotalQtyForProduct(prod.id);
+  return `
+    <div class="flex items-center space-x-1.5 flex-shrink-0">
+      <button onclick="handleDecrease('${prod.id}')" class="qty-btn qty-btn-minus" title="Diminuir">
+        <i class="fa-solid fa-minus text-xs"></i>
+      </button>
+      <span id="qty-display-${prod.id}" class="w-6 text-center font-bold text-sm text-white">
+        ${currentQty}
+      </span>
+      <button onclick="handleIncrease('${prod.id}')" class="qty-btn qty-btn-plus shadow-md" title="Adicionar">
+        <i class="fa-solid fa-plus text-xs"></i>
+      </button>
+    </div>
+  `;
+}
+
+// Sincroniza restrições de entrega para Baldes e Drinks
+function syncDeliveryRestrictions() {
+  const isDelivery = (currentDeliveryType === 'entrega');
+
+  // 1. Atualizar cards de Baldes e Drinks
+  products.forEach(prod => {
+    if (prod.category === 'baldes' || prod.category === 'drinks') {
+      const card = document.getElementById(`card-${prod.id}`);
+      if (card) {
+        if (isDelivery) {
+          card.classList.add('opacity-60', 'border-red-500/30', 'bg-red-950/10');
+        } else {
+          card.classList.remove('opacity-60', 'border-red-500/30', 'bg-red-950/10');
+        }
+
+        const controlsContainer = card.querySelector('.product-controls-area');
+        if (controlsContainer) {
+          controlsContainer.innerHTML = renderCardControlsHtml(prod);
+        }
+      }
+    }
+  });
+
+  // 2. Banners informativos nas seções
+  updateSectionRestrictionBanner('baldes', isDelivery, 'Baldes de Cerveja');
+  updateSectionRestrictionBanner('drinks', isDelivery, 'Drinks & Copões');
+
+  // 3. Se for entrega, remove itens restritos do carrinho
+  if (isDelivery && typeof cart !== 'undefined') {
+    let removedAny = false;
+    Object.keys(cart).forEach(key => {
+      const prodId = key.split(':')[0];
+      const p = products.find(x => x.id === prodId);
+      if (p && (p.category === 'baldes' || p.category === 'drinks')) {
+        delete cart[key];
+        removedAny = true;
+      }
+    });
+
+    if (removedAny) {
+      saveCartToStorage();
+      updateCartUI();
+      if (typeof showToast === 'function') {
+        showToast('Itens de Balde/Drinks foram removidos do carrinho pois não estão disponíveis para entrega.');
+      }
+    }
+  }
+}
+
+function updateSectionRestrictionBanner(category, isDelivery, catName) {
+  const sec = document.getElementById(`sec-${category}`);
+  if (!sec) return;
+
+  const existingBanner = document.getElementById(`banner-${category}-restriction`);
+  if (isDelivery) {
+    if (!existingBanner) {
+      const banner = document.createElement('div');
+      banner.id = `banner-${category}-restriction`;
+      banner.className = 'mb-3 p-3 rounded-2xl bg-red-950/70 border border-red-500/40 text-red-200 text-xs flex items-center justify-between shadow-md animate-scale-up';
+      banner.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base flex-shrink-0"></i>
+          <div>
+            <strong class="block text-white text-xs">Indisponível para Entrega (Delivery)</strong>
+            <span>Não é possível a entrega de ${catName}. Disponível apenas para <strong>Retirada no Balcão</strong>.</span>
+          </div>
+        </div>
+        <button type="button" onclick="openWelcomeModal()" class="text-[11px] font-bold text-brand-gold bg-brand-gold/15 hover:bg-brand-gold hover:text-brand-dark border border-brand-gold/40 px-2.5 py-1.5 rounded-xl ml-2 whitespace-nowrap transition-all flex-shrink-0">
+          Mudar p/ Retirada
+        </button>
+      `;
+      const grid = document.getElementById(`list-${category}`);
+      if (grid && grid.parentNode) {
+        grid.parentNode.insertBefore(banner, grid);
+      }
+    }
+  } else {
+    if (existingBanner) {
+      existingBanner.remove();
+    }
   }
 }
 

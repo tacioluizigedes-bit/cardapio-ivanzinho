@@ -218,12 +218,13 @@
           </div>
 
           <!-- Endereço -->
-          <div class="bg-brand-card p-2.5 rounded-xl border border-brand-border/80 flex items-start space-x-2">
-            <i class="fa-solid fa-location-dot text-brand-fire text-sm mt-0.5"></i>
-            <div class="text-xs">
+          <div class="bg-brand-card p-2.5 rounded-xl border border-brand-border/80 flex items-start space-x-2 min-w-0">
+            <i class="fa-solid fa-location-dot text-brand-fire text-sm mt-0.5 flex-shrink-0"></i>
+            <div class="text-xs min-w-0 flex-1">
               <span class="block font-bold text-gray-200">Localização</span>
-              <p class="text-[11px] text-gray-400 leading-tight truncate" title="Rua Domingos Alves Ribeiro, 32 - Campo Grande">
-                R. Domingos Alves Ribeiro, 32<br>Campo Grande - RJ
+              <p class="text-[11px] text-gray-400 leading-snug">
+                R. Domingos Alves Ribeiro<br>
+                <span class="text-gray-300 font-semibold">Nº 32</span> • Campo Grande
               </p>
             </div>
           </div>
@@ -254,7 +255,7 @@
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-2">
-                <span id="locationBarBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-brand-gold text-brand-dark tracking-wider">Passo 1</span>
+                <span id="locationBarBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-brand-gold text-brand-dark tracking-wider whitespace-nowrap flex-shrink-0">Passo 1</span>
                 <p id="locationBarTitle" class="text-xs font-bold text-white truncate">
                   Consultar entrega no seu endereço
                 </p>
@@ -385,6 +386,16 @@
     </section>
 
   </main>
+
+    <footer class="mt-12 text-center text-[11px] text-gray-500 border-t border-brand-border/40 pt-6 pb-2">
+      <p>Churrasquinho do Ivanzinho &bull; Todos os direitos reservados</p>
+      <p class="mt-1">
+        <a href="admin.html" class="text-gray-500 hover:text-brand-gold transition-colors inline-flex items-center gap-1 font-semibold">
+          <i class="fa-solid fa-lock text-[9px]"></i> Acesso Administrativo
+        </a>
+      </p>
+    </footer>
+
 
   <!-- BARRA FLUTUANTE INFERIOR DO CARRINHO -->
   <div id="floatingCart" class="fixed bottom-0 inset-x-0 bg-brand-card/95 backdrop-blur-lg border-t border-brand-gold/30 p-3.5 z-40 transition-transform duration-300 shadow-2xl translate-y-full">
@@ -3562,6 +3573,7 @@ let pendingOptionProduct = null;
 
 // Inicialização da Página
 document.addEventListener('DOMContentLoaded', () => {
+  loadDynamicStoreData();
   renderAllProducts();
   syncDeliveryRestrictions();
   loadCartFromStorage();
@@ -3586,7 +3598,7 @@ function renderAllProducts() {
 
     const card = document.createElement('div');
     card.id = `card-${prod.id}`;
-    card.className = 'product-card flex items-center justify-between gap-3';
+    card.className = 'product-card flex items-center justify-between gap-3' + (prod.isAvailable === false ? ' opacity-55 grayscale-[30%] border-gray-800' : '');
     
     // Contagem atual desse produto (seja com ou sem opções)
     const currentQty = getTotalQtyForProduct(prod.id);
@@ -3644,6 +3656,11 @@ function filterCategory(cat) {
 function handleIncrease(productId) {
   const prod = products.find(p => p.id === productId);
   if (!prod) return;
+
+  if (prod.isAvailable === false) {
+    alert('Desculpe! O item "' + prod.name + '" está temporariamente esgotado.');
+    return;
+  }
 
   if (currentDeliveryType === 'entrega' && (prod.category === 'baldes' || prod.category === 'drinks')) {
     alert('Não é possível a entrega deste item (' + prod.name + ') via delivery. Disponível apenas para Retirada no Balcão.');
@@ -4085,6 +4102,17 @@ function setupPhoneMask() {
 
 // Montagem do Script e Envio para o WhatsApp
 function submitOrderToWhatsApp() {
+  const savedCfg = localStorage.getItem('ivanzinho_store_config');
+  if (savedCfg) {
+    try {
+      const cfg = JSON.parse(savedCfg);
+      if (cfg.isOpen === false) {
+        alert('O estabelecimento está fechado no momento.\n\n' + (cfg.closedMessage || 'Voltaremos em breve!'));
+        return;
+      }
+    } catch(e){}
+  }
+
   const entries = Object.entries(cart);
   if (entries.length === 0) {
     alert('Seu carrinho está vazio! Adicione pelo menos um item antes de enviar.');
@@ -4629,6 +4657,16 @@ function updateTopLocationBar(type, data) {
 
 // Helper para renderizar controles ou badge de restrição de entrega
 function renderCardControlsHtml(prod) {
+  if (prod.isAvailable === false) {
+    return `
+      <div class="flex items-center flex-shrink-0">
+        <span class="text-[11px] font-bold text-gray-400 bg-gray-900/90 border border-gray-700/80 px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-sm select-none">
+          <i class="fa-solid fa-ban text-[10px] text-red-400"></i> Esgotado hoje
+        </span>
+      </div>
+    `;
+  }
+
   const isDelivery = (currentDeliveryType === 'entrega');
   const isRestricted = isDelivery && (prod.category === 'baldes' || prod.category === 'drinks');
 
@@ -4740,6 +4778,95 @@ function updateSectionRestrictionBanner(category, isDelivery, catName) {
     }
   }
 }
+
+
+
+// =====================================================================
+// SINCRONIZAÇÃO DINÂMICA COM O PAINEL DO DONO (ADMIN)
+// =====================================================================
+function loadDynamicStoreData() {
+  const savedCfg = localStorage.getItem('ivanzinho_store_config');
+  if (savedCfg) {
+    try {
+      const cfg = JSON.parse(savedCfg);
+      applyStoreOpenStatus(cfg.isOpen !== false, cfg.closedMessage);
+      if (cfg.deliveryFee) {
+        DELIVERY_FEE = parseFloat(cfg.deliveryFee);
+        const modalFee = document.getElementById('modalDeliveryTax');
+        if (modalFee && currentDeliveryType === 'entrega') {
+          modalFee.innerText = `R$ ${DELIVERY_FEE.toFixed(2).replace('.', ',')}`;
+        }
+      }
+      if (cfg.maxDistanceKm) {
+        MAX_DELIVERY_KM = parseFloat(cfg.maxDistanceKm);
+      }
+    } catch (e) {}
+  } else {
+    applyStoreOpenStatus(true, '');
+  }
+
+  const savedDb = localStorage.getItem('ivanzinho_products_db');
+  if (savedDb) {
+    try {
+      const customProducts = JSON.parse(savedDb);
+      if (Array.isArray(customProducts) && customProducts.length > 0) {
+        products.length = 0;
+        customProducts.forEach(p => products.push(p));
+      }
+    } catch (e) {}
+  }
+}
+
+function applyStoreOpenStatus(isOpen, closedMessage) {
+  let banner = document.getElementById('storeClosedBanner');
+  const mainEl = document.querySelector('main');
+
+  if (!isOpen) {
+    if (!banner && mainEl) {
+      banner = document.createElement('div');
+      banner.id = 'storeClosedBanner';
+      banner.className = 'mb-6 p-4 rounded-3xl bg-red-950/90 border border-red-500/60 text-white shadow-2xl flex items-center space-x-3.5 animate-scale-up';
+      banner.innerHTML = `
+        <div class="w-11 h-11 rounded-2xl bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center flex-shrink-0 text-xl font-bold">
+          <i class="fa-solid fa-door-closed"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <span class="flex h-2.5 w-2.5 relative">
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+            </span>
+            <strong class="text-sm font-extrabold text-red-300 uppercase tracking-wide">Loja Fechada no Momento</strong>
+          </div>
+          <p class="text-xs text-gray-200 mt-1 leading-snug">${closedMessage || 'Estamos fechados no momento. Reabrimos em breve!'}</p>
+          <span class="text-[11px] text-amber-400 font-semibold block mt-1">Você pode consultar o cardápio e preços livremente.</span>
+        </div>
+      `;
+      mainEl.insertBefore(banner, mainEl.firstChild);
+    }
+  } else {
+    if (banner) banner.remove();
+  }
+}
+
+// Sincronização em tempo real entre abas e dispositivos
+if ('BroadcastChannel' in window) {
+  const syncChannel = new BroadcastChannel('ivanzinho_sync_channel');
+  syncChannel.onmessage = (event) => {
+    loadDynamicStoreData();
+    renderAllProducts();
+    syncDeliveryRestrictions();
+    updateCartUI();
+  };
+}
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'ivanzinho_store_config' || e.key === 'ivanzinho_products_db') {
+    loadDynamicStoreData();
+    renderAllProducts();
+    syncDeliveryRestrictions();
+    updateCartUI();
+  }
+});
 
 </script>
 </body>

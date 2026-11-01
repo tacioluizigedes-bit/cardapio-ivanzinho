@@ -178,6 +178,9 @@
 }
 
 </style>
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-brand-dark text-gray-100 font-body min-h-screen pb-24 selection:bg-brand-gold selection:text-black">
 
@@ -3574,6 +3577,7 @@ let pendingOptionProduct = null;
 // Inicialização da Página
 document.addEventListener('DOMContentLoaded', () => {
   loadDynamicStoreData();
+  initClientFirebase();
   renderAllProducts();
   syncDeliveryRestrictions();
   loadCartFromStorage();
@@ -4867,6 +4871,85 @@ window.addEventListener('storage', (e) => {
     updateCartUI();
   }
 });
+
+
+
+// =====================================================================
+// SINCRONIZAÇÃO EM NUVEM EM TEMPO REAL (FIREBASE FIRESTORE)
+// =====================================================================
+const OFFICIAL_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDlaqLg53U3A_5lwF6aQFE-6tbyir7b3gY",
+  authDomain: "churrasquinho-ivanzinho.firebaseapp.com",
+  projectId: "churrasquinho-ivanzinho",
+  storageBucket: "churrasquinho-ivanzinho.firebasestorage.app",
+  messagingSenderId: "813216124096",
+  appId: "1:813216124096:web:a39eb30c9930c09313b125",
+  measurementId: "G-0ZSWV1NPGG"
+};
+
+function initClientFirebase() {
+  let savedConfig = localStorage.getItem('ivanzinho_firebase_config');
+  if (!savedConfig) {
+    savedConfig = JSON.stringify(OFFICIAL_FIREBASE_CONFIG);
+    localStorage.setItem('ivanzinho_firebase_config', savedConfig);
+  }
+  if (!savedConfig) return;
+
+  try {
+    let configObj = null;
+    if (savedConfig.trim().startsWith('{')) {
+      configObj = JSON.parse(savedConfig);
+    } else {
+      const cleanStr = savedConfig
+        .replace(/const\s+firebaseConfig\s*=\s*/, '')
+        .replace(/var\s+firebaseConfig\s*=\s*/, '')
+        .replace(/let\s+firebaseConfig\s*=\s*/, '')
+        .replace(/;\s*$/, '');
+      configObj = JSON.parse(cleanStr);
+    }
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(configObj);
+    }
+    const db = firebase.firestore();
+
+    // 1. Escuta status da loja (Aberto / Fechado) em tempo real
+    db.collection('settings').doc('store').onSnapshot(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        applyStoreOpenStatus(data.isOpen !== false, data.closedMessage);
+        if (data.deliveryFee) {
+          DELIVERY_FEE = parseFloat(data.deliveryFee);
+          const modalFee = document.getElementById('modalDeliveryTax');
+          if (modalFee && currentDeliveryType === 'entrega') {
+            modalFee.innerText = `R$ ${DELIVERY_FEE.toFixed(2).replace('.', ',')}`;
+          }
+        }
+        if (data.maxDistanceKm) {
+          MAX_DELIVERY_KM = parseFloat(data.maxDistanceKm);
+        }
+      }
+    });
+
+    // 2. Escuta catálogo de produtos (Preços, Esgotados, Novos Itens) em tempo real
+    db.collection('products').onSnapshot(snapshot => {
+      if (!snapshot.empty) {
+        const remoteProducts = [];
+        snapshot.forEach(doc => {
+          remoteProducts.push({ id: doc.id, ...doc.data() });
+        });
+        products.length = 0;
+        remoteProducts.forEach(p => products.push(p));
+        renderAllProducts();
+        syncDeliveryRestrictions();
+        updateCartUI();
+      }
+    });
+
+  } catch (err) {
+    console.warn('Erro ao conectar cliente ao Firebase:', err);
+  }
+}
 
 </script>
 </body>

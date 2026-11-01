@@ -64,6 +64,9 @@
       background-color: #10B981;
     }
   </style>
+  <!-- Firebase SDK Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="min-h-screen bg-brand-dark pb-16">
 
@@ -352,6 +355,7 @@
     <!-- CONTEÚDO DA ABA: NUVEM (FIREBASE) -->
     <!-- ============================================================ -->
     <div id="tabContentCloud" class="hidden space-y-4">
+      <div id="firebaseStatusBanner" class="p-3.5 rounded-2xl bg-brand-dark/90 border border-brand-border flex items-center justify-between text-xs text-gray-300"><div class="flex items-center gap-2.5"><i class="fa-solid fa-cloud-slash text-gray-400 text-base"></i><div><strong class="text-white block">Modo Local Ativo</strong><span>Configure as chaves abaixo para sincronizar em tempo real.</span></div></div></div>
       <div class="bg-brand-card p-5 rounded-3xl border border-brand-border space-y-4">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 rounded-2xl bg-amber-500/15 text-brand-gold flex items-center justify-center text-xl">
@@ -533,6 +537,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       loadLocalData();
       checkAuthSession();
+      initFirebaseIntegration();
     });
 
     function loadLocalData() {
@@ -606,6 +611,7 @@
       storeConfig.isOpen = !storeConfig.isOpen;
       saveConfig();
       updateStoreStatusUI();
+      pushStoreConfigToFirestore();
       notifyClientSync('store_status', storeConfig);
       showToast(storeConfig.isOpen ? 'Loja ABERTA! Pedidos liberados.' : 'Loja FECHADA! Pedidos bloqueados.');
     }
@@ -752,6 +758,7 @@
       if (isNaN(val) || val < 0) return;
       p.price = val;
       saveProducts();
+      pushProductToFirestore(p);
       notifyClientSync('product_updated', p);
       showToast(`Preço de "${p.name}" atualizado para R$ ${val.toFixed(2)}!`);
     }
@@ -853,6 +860,7 @@
       }
 
       saveProducts();
+      if (typeof p !== 'undefined') pushProductToFirestore(p); else if (productsList.length > 0) pushProductToFirestore(productsList[productsList.length-1]);
       closeProductModal();
       renderAdminProducts();
       notifyClientSync('products_list', productsList);
@@ -865,6 +873,7 @@
       if (confirm(`Tem certeza que deseja excluir "${p.name}"?`)) {
         productsList = productsList.filter(x => x.id !== id);
         saveProducts();
+        removeProductFromFirestore(id);
         renderAdminProducts();
         notifyClientSync('products_list', productsList);
         showToast('Produto excluído.');
@@ -898,6 +907,7 @@
       }
 
       saveConfig();
+      pushStoreConfigToFirestore();
       notifyClientSync('store_config', storeConfig);
       showToast('Configurações salvas e aplicadas!');
     }
@@ -958,14 +968,188 @@
       }, 3000);
     }
 
-    function saveFirebaseConfig() {
+    
+    // ==========================================
+    // INTEGRAÇÃO COM O FIREBASE FIRESTORE
+    // ==========================================
+    let firestoreDb = null;
+    let isFirebaseReady = false;
+
+    const OFFICIAL_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDlaqLg53U3A_5lwF6aQFE-6tbyir7b3gY",
+  authDomain: "churrasquinho-ivanzinho.firebaseapp.com",
+  projectId: "churrasquinho-ivanzinho",
+  storageBucket: "churrasquinho-ivanzinho.firebasestorage.app",
+  messagingSenderId: "813216124096",
+  appId: "1:813216124096:web:a39eb30c9930c09313b125",
+  measurementId: "G-0ZSWV1NPGG"
+};
+
+    function initFirebaseIntegration() {
+      let savedConfig = localStorage.getItem('ivanzinho_firebase_config');
+      if (!savedConfig) {
+        savedConfig = JSON.stringify(OFFICIAL_FIREBASE_CONFIG);
+        localStorage.setItem('ivanzinho_firebase_config', savedConfig);
+      }
+      if (!savedConfig) {
+        updateFirebaseStatusUI(false, 'Nenhuma chave configurada. Operando em modo LocalStorage.');
+        return;
+      }
+
+      try {
+        let configObj = null;
+        if (savedConfig.trim().startsWith('{')) {
+          configObj = JSON.parse(savedConfig);
+        } else {
+          // Parse if user pasted js format
+          const cleanStr = savedConfig
+            .replace(/const\s+firebaseConfig\s*=\s*/, '')
+            .replace(/var\s+firebaseConfig\s*=\s*/, '')
+            .replace(/let\s+firebaseConfig\s*=\s*/, '')
+            .replace(/;\s*$/, '');
+          configObj = JSON.parse(cleanStr);
+        }
+
+        if (!firebase.apps.length) {
+          firebase.initializeApp(configObj);
+        }
+        firestoreDb = firebase.firestore();
+        isFirebaseReady = true;
+
+        updateFirebaseStatusUI(true, `Conectado ao projeto: ${configObj.projectId}`);
+        document.getElementById('firebaseConfigInput').value = JSON.stringify(configObj, null, 2);
+
+        // Carrega dados iniciais do Firebase ou sincroniza se estiver vazio
+        syncFromFirebase();
+
+      } catch (err) {
+        console.error('Erro ao inicializar Firebase:', err);
+        updateFirebaseStatusUI(false, 'Erro ao conectar: Verifique se o JSON ou as chaves estão corretos.');
+      }
+    }
+
+    function updateFirebaseStatusUI(connected, message) {
+      const banner = document.getElementById('firebaseStatusBanner');
+      if (!banner) return;
+
+      if (connected) {
+        banner.className = 'p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-500/50 flex items-center justify-between text-xs text-emerald-200';
+        banner.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="flex h-2.5 w-2.5 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <div>
+              <strong class="text-white block">🟢 Nuvem Firebase Ativa e Conectada</strong>
+              <span>${message}</span>
+            </div>
+          </div>
+          <button onclick="pushAllToFirebase()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs whitespace-nowrap shadow transition-all">
+            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Enviar Cardápio p/ Nuvem
+          </button>
+        `;
+      } else {
+        banner.className = 'p-3.5 rounded-2xl bg-brand-dark/90 border border-brand-border flex items-center justify-between text-xs text-gray-300';
+        banner.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-cloud-slash text-gray-400 text-base"></i>
+            <div>
+              <strong class="text-white block">Modo Local Ativo (Sem Nuvem)</strong>
+              <span>${message}</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    async function syncFromFirebase() {
+      if (!firestoreDb) return;
+      try {
+        // 1. Escuta alterações em Configurações
+        firestoreDb.collection('settings').doc('store').onSnapshot(doc => {
+          if (doc.exists) {
+            storeConfig = { ...DEFAULT_STORE_CONFIG, ...doc.data() };
+            saveConfig();
+            updateStoreStatusUI();
+            populateConfigInputs();
+          }
+        });
+
+        // 2. Escuta alterações em Produtos
+        firestoreDb.collection('products').onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            const remoteProducts = [];
+            snapshot.forEach(doc => {
+              remoteProducts.push({ id: doc.id, ...doc.data() });
+            });
+            productsList = remoteProducts;
+            saveProducts();
+            renderAdminProducts();
+          }
+        });
+
+      } catch (e) {
+        console.warn('Erro ao escutar Firestore:', e);
+      }
+    }
+
+    // Envia todos os produtos e configurações para a Nuvem com 1 clique (Seed)
+    async function pushAllToFirebase() {
+      if (!firestoreDb) {
+        alert('Firebase não está conectado. Configure as chaves primeiro.');
+        return;
+      }
+
+      showToast('Enviando cardápio para a nuvem...');
+      try {
+        // Envia configurações
+        await firestoreDb.collection('settings').doc('store').set(storeConfig);
+
+        // Envia produtos em lote (batch)
+        const batch = firestoreDb.batch();
+        productsList.forEach(prod => {
+          const docRef = firestoreDb.collection('products').doc(prod.id);
+          batch.set(docRef, prod);
+        });
+        await batch.commit();
+
+        showToast('Cardápio sincronizado na Nuvem com Sucesso!');
+        alert('Sucesso! O cardápio completo e as configurações foram salvos no Firebase. Agora qualquer aparelho conectado receberá as atualizações em tempo real!');
+      } catch (err) {
+        console.error('Erro ao enviar lote para o Firebase:', err);
+        alert('Erro ao enviar para o Firebase: ' + err.message + '\n\nVerifique se as Regras do Firestore estão no Modo de Teste (read, write: true).');
+      }
+    }
+
+    // Atualiza um produto no Firestore se a nuvem estiver ativa
+    function pushProductToFirestore(prod) {
+      if (!firestoreDb) return;
+      firestoreDb.collection('products').doc(prod.id).set(prod, { merge: true })
+        .catch(err => console.error('Erro ao atualizar produto no Firestore:', err));
+    }
+
+    function removeProductFromFirestore(prodId) {
+      if (!firestoreDb) return;
+      firestoreDb.collection('products').doc(prodId).delete()
+        .catch(err => console.error('Erro ao excluir produto no Firestore:', err));
+    }
+
+    function pushStoreConfigToFirestore() {
+      if (!firestoreDb) return;
+      firestoreDb.collection('settings').doc('store').set(storeConfig, { merge: true })
+        .catch(err => console.error('Erro ao atualizar configurações no Firestore:', err));
+    }
+
+function saveFirebaseConfig() {
       const val = document.getElementById('firebaseConfigInput').value.trim();
       if (!val) {
         alert('Cole a configuração do Firebase antes de conectar.');
         return;
       }
       localStorage.setItem('ivanzinho_firebase_config', val);
-      showToast('Configuração salva! Pronto para sincronizar com a nuvem.');
+      initFirebaseIntegration();
+      showToast('Firebase configurado! Conectando à nuvem...');
     }
   </script>
 </body>

@@ -961,14 +961,19 @@
       });
     }
 
-    function showToast(msg) {
+    function showToast(msg, type = 'success') {
       const toast = document.getElementById('adminToast');
       const text = document.getElementById('adminToastMessage');
+      if (type === 'error') {
+        toast.className = 'fixed bottom-5 right-5 z-50 bg-red-950 border border-red-500 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 transition-all duration-300';
+      } else {
+        toast.className = 'fixed bottom-5 right-5 z-50 bg-brand-card border border-brand-gold/60 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 transition-all duration-300';
+      }
       text.innerText = msg;
       toast.classList.remove('translate-y-20', 'opacity-0');
       setTimeout(() => {
         toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3000);
+      }, 4000);
     }
 
     
@@ -1048,7 +1053,7 @@
               <span>${message}</span>
             </div>
           </div>
-          <button onclick="pushAllToFirebase()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs whitespace-nowrap shadow transition-all">
+          <div class="flex gap-2"><button onclick="testFirebaseConnection()" class="px-3 py-1.5 bg-brand-dark border border-brand-gold text-brand-gold hover:bg-brand-gold hover:text-black font-bold rounded-xl text-xs whitespace-nowrap shadow transition-all"><i class="fa-solid fa-stethoscope mr-1"></i> Testar Conexão</button><button onclick="pushAllToFirebase()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs whitespace-nowrap shadow transition-all">
             <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Enviar Cardápio p/ Nuvem
           </button>
         `;
@@ -1126,10 +1131,14 @@
     }
 
     // Atualiza um produto no Firestore se a nuvem estiver ativa
-    function pushProductToFirestore(prod) {
+    async function pushProductToFirestore(prod) {
       if (!firestoreDb) return;
-      firestoreDb.collection('products').doc(prod.id).set(prod, { merge: true })
-        .catch(err => console.error('Erro ao atualizar produto no Firestore:', err));
+      try {
+        await firestoreDb.collection('products').doc(prod.id).set(prod, { merge: true });
+      } catch (err) {
+        console.error('Erro ao atualizar produto no Firestore:', err);
+        showToast('⚠️ Firebase: ' + (err.code === 'permission-denied' ? 'Permissão negada. Ative as Regras no console.' : err.message), 'error');
+      }
     }
 
     function removeProductFromFirestore(prodId) {
@@ -1138,10 +1147,39 @@
         .catch(err => console.error('Erro ao excluir produto no Firestore:', err));
     }
 
-    function pushStoreConfigToFirestore() {
+    
+    async function testFirebaseConnection() {
+      if (!firestoreDb) {
+        alert('Firebase não inicializado. Verifique a configuração.');
+        return;
+      }
+      showToast('Testando gravação no Firebase...');
+      try {
+        await firestoreDb.collection('_status').doc('ping').set({
+          timestamp: Date.now(),
+          test: 'ok'
+        });
+        showToast('🟢 Sucesso! Banco de Dados e Permissões 100% Ativos!');
+        alert('🟢 Conexão Perfeita!\n\nO seu Firestore está gravando e lendo perfeitamente. Todas as alterações feitas no painel agora refletirão em tempo real nos clientes!');
+      } catch (err) {
+        console.error('Erro no teste de permissão:', err);
+        if (err.code === 'permission-denied' || (err.message && err.message.includes('permission'))) {
+          alert('🔴 403 PERMISSÃO NEGADA NO FIREBASE!\n\nO banco de dados existe, mas as Regras de Segurança estão bloqueando.\n\nComo resolver em 30 segundos:\n1. Abra console.firebase.google.com\n2. Vá em Firestore Database > aba Regras (Rules)\n3. Altere para:\nallow read, write: if true;\n4. Clique em Publicar (Publish).');
+        } else {
+          alert('Erro ao conectar ao Firebase: ' + err.message);
+        }
+      }
+    }
+
+async function pushStoreConfigToFirestore() {
       if (!firestoreDb) return;
-      firestoreDb.collection('settings').doc('store').set(storeConfig, { merge: true })
-        .catch(err => console.error('Erro ao atualizar configurações no Firestore:', err));
+      try {
+        await firestoreDb.collection('settings').doc('store').set(storeConfig, { merge: true });
+        console.log('Configurações salvas no Firestore com sucesso.');
+      } catch (err) {
+        console.error('Erro ao salvar no Firestore:', err);
+        showToast('⚠️ Firebase: ' + (err.code === 'permission-denied' ? 'Permissão negada. Ative as Regras no console.' : err.message), 'error');
+      }
     }
 
 function saveFirebaseConfig() {

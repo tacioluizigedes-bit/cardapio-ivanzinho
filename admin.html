@@ -553,8 +553,9 @@
       if (savedProducts) {
         try { productsList = JSON.parse(savedProducts); } catch (e) {}
       }
-      if (!productsList || productsList.length === 0) {
-        productsList = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+      // Se a lista estiver vazia ou foi corrompida com menos de 10 itens, restaura todos os produtos
+      if (!productsList || productsList.length < 10) {
+        productsList = mergeProductsWithRemote(productsList || []);
         saveProducts();
       }
 
@@ -1071,7 +1072,25 @@
       }
     }
 
-    async function syncFromFirebase() {
+    
+    // Merge inteligente: Mantém sempre todos os produtos originais e aplica apenas as alterações da nuvem
+    function mergeProductsWithRemote(remoteProducts) {
+      const mergedMap = new Map();
+      DEFAULT_PRODUCTS.forEach(p => mergedMap.set(p.id, { ...p }));
+
+      remoteProducts.forEach(remote => {
+        if (remote.deleted === true) {
+          mergedMap.delete(remote.id);
+        } else {
+          const existing = mergedMap.get(remote.id) || { id: remote.id };
+          mergedMap.set(remote.id, { ...existing, ...remote });
+        }
+      });
+
+      return Array.from(mergedMap.values());
+    }
+
+async function syncFromFirebase() {
       if (!firestoreDb) return;
       try {
         // 1. Escuta alterações em Configurações
@@ -1084,17 +1103,15 @@
           }
         });
 
-        // 2. Escuta alterações em Produtos
+        // 2. Escuta alterações em Produtos com Merge Seguro (Nunca apaga os outros itens)
         firestoreDb.collection('products').onSnapshot(snapshot => {
-          if (!snapshot.empty) {
-            const remoteProducts = [];
-            snapshot.forEach(doc => {
-              remoteProducts.push({ id: doc.id, ...doc.data() });
-            });
-            productsList = remoteProducts;
-            saveProducts();
-            renderAdminProducts();
-          }
+          const remoteProducts = [];
+          snapshot.forEach(doc => {
+            remoteProducts.push({ id: doc.id, ...doc.data() });
+          });
+          productsList = mergeProductsWithRemote(remoteProducts);
+          saveProducts();
+          renderAdminProducts();
         });
 
       } catch (e) {
@@ -1143,7 +1160,7 @@
 
     function removeProductFromFirestore(prodId) {
       if (!firestoreDb) return;
-      firestoreDb.collection('products').doc(prodId).delete()
+      firestoreDb.collection('products').doc(prodId).set({ deleted: true }, { merge: true })
         .catch(err => console.error('Erro ao excluir produto no Firestore:', err));
     }
 

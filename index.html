@@ -3567,6 +3567,8 @@ const products = [
 ];
 
 // Estado do Carrinho: Map de itemKey -> { product, quantity, selectedOption }
+const BASE_PRODUCTS = JSON.parse(JSON.stringify(products));
+
 let cart = {};
 let currentDeliveryType = 'entrega'; // 'entrega' ou 'retirada'
 const DELIVERY_FEE = 5.00; // Taxa de entrega fixa (R$)
@@ -4931,19 +4933,28 @@ function initClientFirebase() {
       }
     });
 
-    // 2. Escuta catálogo de produtos (Preços, Esgotados, Novos Itens) em tempo real
+    // 2. Escuta catálogo de produtos em tempo real com Merge Seguro (Nunca apaga os itens base)
     db.collection('products').onSnapshot(snapshot => {
-      if (!snapshot.empty) {
-        const remoteProducts = [];
-        snapshot.forEach(doc => {
-          remoteProducts.push({ id: doc.id, ...doc.data() });
-        });
-        products.length = 0;
-        remoteProducts.forEach(p => products.push(p));
-        renderAllProducts();
-        syncDeliveryRestrictions();
-        updateCartUI();
+      const mergedMap = new Map();
+      if (typeof BASE_PRODUCTS !== 'undefined') {
+        BASE_PRODUCTS.forEach(p => mergedMap.set(p.id, { ...p }));
       }
+
+      snapshot.forEach(doc => {
+        const remote = doc.data();
+        if (remote.deleted === true) {
+          mergedMap.delete(doc.id);
+        } else {
+          const existing = mergedMap.get(doc.id) || { id: doc.id };
+          mergedMap.set(doc.id, { ...existing, ...remote });
+        }
+      });
+
+      products.length = 0;
+      mergedMap.forEach(p => products.push(p));
+      renderAllProducts();
+      syncDeliveryRestrictions();
+      updateCartUI();
     });
 
   } catch (err) {

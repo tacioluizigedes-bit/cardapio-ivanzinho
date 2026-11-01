@@ -110,7 +110,7 @@
       </div>
 
       <p class="text-[11px] text-gray-500">
-        PIN padrão de teste: <strong class="text-gray-300">1919</strong>
+        Acesso protegido &bull; Digite o PIN de 4 dígitos
       </p>
 
       <div class="pt-2 border-t border-brand-border">
@@ -336,7 +336,7 @@
 
         <div>
           <label class="block text-xs font-bold text-gray-300 mb-1">Novo PIN de 4 dígitos</label>
-          <input type="password" id="cfgAdminPin" maxlength="6" value="1919" class="w-48 bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm text-center font-bold tracking-widest text-brand-gold focus:outline-none focus:border-brand-gold">
+          <input type="password" id="cfgAdminPin" maxlength="6" value="2203" class="w-48 bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-sm text-center font-bold tracking-widest text-brand-gold focus:outline-none focus:border-brand-gold">
         </div>
       </div>
 
@@ -498,7 +498,7 @@
       maxDistanceKm: 5,
       storeAddress: "Rua Domingos Alves Ribeiro, 32 - Campo Grande, RJ",
       storeHours: "Qua a Sex: 19h | Sáb e Dom: 12h (Almoço/Janta)",
-      pin: "1919"
+      pin: "2203"
     };
 
     // Banco de Produtos Padrão
@@ -543,7 +543,10 @@
     function loadLocalData() {
       const savedConfig = localStorage.getItem('ivanzinho_store_config');
       if (savedConfig) {
-        try { storeConfig = { ...DEFAULT_STORE_CONFIG, ...JSON.parse(savedConfig) }; } catch (e) {}
+        try {
+          storeConfig = { ...DEFAULT_STORE_CONFIG, ...JSON.parse(savedConfig) };
+          if (storeConfig.pin === '1919') storeConfig.pin = '2203';
+        } catch (e) {}
       }
 
       const savedProducts = localStorage.getItem('ivanzinho_products_db');
@@ -588,7 +591,7 @@
 
     function submitPin() {
       const input = document.getElementById('pinInput');
-      const correctPin = storeConfig.pin || '1919';
+      const correctPin = (storeConfig.pin && storeConfig.pin !== '1919') ? storeConfig.pin : '2203';
       if (input.value === correctPin) {
         sessionStorage.setItem('ivanzinho_admin_auth', 'true');
         checkAuthSession();
@@ -890,7 +893,7 @@
       document.getElementById('cfgMaxDistance').value = storeConfig.maxDistanceKm || 5;
       document.getElementById('cfgStoreAddress').value = storeConfig.storeAddress || '';
       document.getElementById('cfgStoreHours').value = storeConfig.storeHours || '';
-      document.getElementById('cfgAdminPin').value = storeConfig.pin || '1919';
+      document.getElementById('cfgAdminPin').value = storeConfig.pin || '2203';
     }
 
     function saveStoreConfig() {

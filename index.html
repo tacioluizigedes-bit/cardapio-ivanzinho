@@ -653,7 +653,14 @@
 
       <!-- Footer com Botão de Enviar Pedido -->
       <div class="p-4 bg-brand-cardLight border-t border-brand-border space-y-2">
-        <button onclick="submitOrderToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-2xl text-base flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 active:scale-98 transition-all">
+        <div id="checkoutClosedNotice" class="hidden p-3 bg-red-950/90 border border-red-500/60 rounded-2xl text-center text-xs text-red-200 shadow-inner">
+          <div class="flex items-center justify-center gap-1.5 font-bold text-red-300 mb-0.5">
+            <i class="fa-solid fa-door-closed"></i> Loja Fechada no Momento
+          </div>
+          <p id="checkoutClosedMsgText" class="text-xs text-gray-300">Estamos fechados no momento. Reabrimos em breve!</p>
+          <span class="text-[11px] text-amber-400 font-semibold block mt-1">Não estamos aceitando novos pedidos agora.</span>
+        </div>
+        <button id="btnSubmitOrder" onclick="submitOrderToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-2xl text-base flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 active:scale-98 transition-all">
           <i class="fa-brands fa-whatsapp text-2xl"></i>
           <span>ENVIAR PEDIDO NO WHATSAPP</span>
         </button>
@@ -3119,7 +3126,7 @@ var qrcode = function() {
 // =====================================================================
 
 const STORE_LOCATION = { lat: -22.9207602, lng: -43.5465821 }; // OpenStreetMap
-const MAX_DELIVERY_KM = 5;
+let MAX_DELIVERY_KM = 5;
 
 // Estado da verificação do endereço
 // status: 'pending' | 'checking' | 'ok' | 'out' | 'notfound'
@@ -3571,7 +3578,9 @@ const BASE_PRODUCTS = JSON.parse(JSON.stringify(products));
 
 let cart = {};
 let currentDeliveryType = 'entrega'; // 'entrega' ou 'retirada'
-const DELIVERY_FEE = 5.00; // Taxa de entrega fixa (R$)
+let DELIVERY_FEE = 5.00; // Taxa de entrega fixa (R$)
+let isStoreOpen = true; // Status mestre da loja (Aberto / Fechado)
+let storeClosedMessage = 'Estamos fechados no momento. Reabrimos em breve!';
 
 // Variáveis de controle para o Modal de Opções
 let pendingOptionProduct = null;
@@ -3597,6 +3606,10 @@ function renderAllProducts() {
     'bebidas': document.getElementById('list-bebidas'),
     'drinks': document.getElementById('list-drinks'),
   };
+
+  Object.values(sections).forEach(el => {
+    if (el) el.innerHTML = '';
+  });
 
   products.forEach(prod => {
     const targetEl = sections[prod.category];
@@ -3660,6 +3673,10 @@ function filterCategory(cat) {
 
 // Manipulação de Aumento de Quantidade
 function handleIncrease(productId) {
+  if (!isStoreOpen) {
+    alert('O estabelecimento está fechado no momento.\n\n' + storeClosedMessage + '\n\nVocê pode consultar os itens e preços do cardápio.');
+    return;
+  }
   const prod = products.find(p => p.id === productId);
   if (!prod) return;
 
@@ -3702,6 +3719,10 @@ function handleDecrease(productId) {
 
 // Adiciona item com ou sem opção ao carrinho
 function addItemToCart(productId, selectedOption) {
+  if (!isStoreOpen) {
+    alert('O estabelecimento está fechado no momento.\n\n' + storeClosedMessage);
+    return;
+  }
   const prod = products.find(p => p.id === productId);
   if (!prod) return;
 
@@ -4108,12 +4129,17 @@ function setupPhoneMask() {
 
 // Montagem do Script e Envio para o WhatsApp
 function submitOrderToWhatsApp() {
+  if (!isStoreOpen) {
+    alert('O estabelecimento está fechado no momento.\n\n' + storeClosedMessage + '\n\nNão é possível enviar pedidos enquanto a loja estiver fechada.');
+    return;
+  }
+
   const savedCfg = localStorage.getItem('ivanzinho_store_config');
   if (savedCfg) {
     try {
       const cfg = JSON.parse(savedCfg);
       if (cfg.isOpen === false) {
-        alert('O estabelecimento está fechado no momento.\n\n' + (cfg.closedMessage || 'Voltaremos em breve!'));
+        alert('O estabelecimento está fechado no momento.\n\n' + (cfg.closedMessage || storeClosedMessage));
         return;
       }
     } catch(e){}
@@ -4673,6 +4699,16 @@ function renderCardControlsHtml(prod) {
     `;
   }
 
+  if (!isStoreOpen) {
+    return `
+      <div class="flex items-center flex-shrink-0">
+        <span class="text-[11px] font-bold text-red-300 bg-red-950/80 border border-red-500/40 px-2.5 py-1 rounded-xl flex items-center gap-1.5 shadow-sm select-none" title="Loja Fechada no Momento">
+          <i class="fa-solid fa-door-closed text-[10px] text-red-400"></i> Fechado
+        </span>
+      </div>
+    `;
+  }
+
   const isDelivery = (currentDeliveryType === 'entrega');
   const isRestricted = isDelivery && (prod.category === 'baldes' || prod.category === 'drinks');
 
@@ -4795,7 +4831,9 @@ function loadDynamicStoreData() {
   if (savedCfg) {
     try {
       const cfg = JSON.parse(savedCfg);
-      applyStoreOpenStatus(cfg.isOpen !== false, cfg.closedMessage);
+      isStoreOpen = (cfg.isOpen !== false);
+      if (cfg.closedMessage) storeClosedMessage = cfg.closedMessage;
+      applyStoreOpenStatus(isStoreOpen, storeClosedMessage);
       if (cfg.deliveryFee) {
         DELIVERY_FEE = parseFloat(cfg.deliveryFee);
         const modalFee = document.getElementById('modalDeliveryTax');
@@ -4823,11 +4861,41 @@ function loadDynamicStoreData() {
   }
 }
 
+function updateCheckoutState() {
+  const btnSubmit = document.getElementById('btnSubmitOrder');
+  const noticeEl = document.getElementById('checkoutClosedNotice');
+  const noticeMsg = document.getElementById('checkoutClosedMsgText');
+
+  if (!isStoreOpen) {
+    if (noticeEl) {
+      noticeEl.classList.remove('hidden');
+      if (noticeMsg) noticeMsg.innerText = storeClosedMessage;
+    }
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.className = 'w-full bg-gray-800 text-gray-400 font-extrabold py-3.5 px-4 rounded-2xl text-base flex items-center justify-center space-x-2 border border-gray-700/60 cursor-not-allowed opacity-75 shadow-none transition-all';
+      btnSubmit.innerHTML = '<i class="fa-solid fa-ban text-xl text-red-400"></i><span>LOJA FECHADA - PEDIDOS INDISPONÍVEIS</span>';
+    }
+  } else {
+    if (noticeEl) {
+      noticeEl.classList.add('hidden');
+    }
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.className = 'w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-2xl text-base flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 active:scale-98 transition-all';
+      btnSubmit.innerHTML = '<i class="fa-brands fa-whatsapp text-2xl"></i><span>ENVIAR PEDIDO NO WHATSAPP</span>';
+    }
+  }
+}
+
 function applyStoreOpenStatus(isOpen, closedMessage) {
+  isStoreOpen = (isOpen !== false);
+  if (closedMessage) storeClosedMessage = closedMessage;
+
   let banner = document.getElementById('storeClosedBanner');
   const mainEl = document.querySelector('main');
 
-  if (!isOpen) {
+  if (!isStoreOpen) {
     if (!banner && mainEl) {
       banner = document.createElement('div');
       banner.id = 'storeClosedBanner';
@@ -4843,15 +4911,20 @@ function applyStoreOpenStatus(isOpen, closedMessage) {
             </span>
             <strong class="text-sm font-extrabold text-red-300 uppercase tracking-wide">Loja Fechada no Momento</strong>
           </div>
-          <p class="text-xs text-gray-200 mt-1 leading-snug">${closedMessage || 'Estamos fechados no momento. Reabrimos em breve!'}</p>
-          <span class="text-[11px] text-amber-400 font-semibold block mt-1">Você pode consultar o cardápio e preços livremente.</span>
+          <p class="text-xs text-gray-200 mt-1 leading-snug">${storeClosedMessage}</p>
+          <span class="text-[11px] text-amber-400 font-semibold block mt-1">Você pode consultar o cardápio e preços livremente, mas pedidos estão temporariamente pausados.</span>
         </div>
       `;
       mainEl.insertBefore(banner, mainEl.firstChild);
+    } else if (banner) {
+      const p = banner.querySelector('p');
+      if (p) p.innerText = storeClosedMessage;
     }
   } else {
     if (banner) banner.remove();
   }
+
+  updateCheckoutState();
 }
 
 // Sincronização em tempo real entre abas e dispositivos
@@ -4919,7 +4992,24 @@ function initClientFirebase() {
     db.collection('settings').doc('store').onSnapshot(doc => {
       if (doc.exists) {
         const data = doc.data();
-        applyStoreOpenStatus(data.isOpen !== false, data.closedMessage);
+        isStoreOpen = (data.isOpen !== false);
+        if (data.closedMessage) storeClosedMessage = data.closedMessage;
+
+        let currentLocal = {};
+        try {
+          currentLocal = JSON.parse(localStorage.getItem('ivanzinho_store_config') || '{}');
+        } catch(e) {}
+        currentLocal.isOpen = isStoreOpen;
+        currentLocal.closedMessage = storeClosedMessage;
+        if (data.deliveryFee) currentLocal.deliveryFee = data.deliveryFee;
+        if (data.maxDistanceKm) currentLocal.maxDistanceKm = data.maxDistanceKm;
+        localStorage.setItem('ivanzinho_store_config', JSON.stringify(currentLocal));
+
+        applyStoreOpenStatus(isStoreOpen, storeClosedMessage);
+        renderAllProducts();
+        syncDeliveryRestrictions();
+        updateCartUI();
+
         if (data.deliveryFee) {
           DELIVERY_FEE = parseFloat(data.deliveryFee);
           const modalFee = document.getElementById('modalDeliveryTax');
